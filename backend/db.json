@@ -1,0 +1,143 @@
+{
+ "users": [
+  {
+   "username": "快递侠",
+   "password": "79fc81d51d8c9ed9:e803c9d5e1a40e4d8cfcc3c8a8051570146e2589465af8d6b3d5cc0630e18f42",
+   "coins": 500,
+   "rep": 30,
+   "school": "东山校区"
+  },
+  {
+   "username": "高数之神",
+   "password": "73db8a357bfa5f18:8c4eaa66dcdbb91e799a7fafa5d8cb94cf994645e3255075f605cf8c9c797f86",
+   "coins": 800,
+   "rep": 45,
+   "school": "西山校区"
+  },
+  {
+   "username": "甲同学",
+   "password": "25dbab85f28367c3:454cd44afec3866d665ce9b5a68caa7f1c0c314bac2b3eebede4555973be877c",
+   "coins": 70,
+   "rep": 2,
+   "school": "东山校区"
+  },
+  {
+   "username": "乙同学",
+   "password": "87aa19fec63c463e:e7b27bc4d0d8ef8ab0834cc2f1c2c80d4eb4d8a8edaee2483382713d33fd4273",
+   "coins": 100,
+   "rep": 0,
+   "school": "西山校区"
+  }
+ ],
+ "quests": [
+  {
+   "id": 6,
+   "title": "【跨区】收一本《操作系统》教材",
+   "cat": "悬赏",
+   "reward": 40,
+   "diff": 1,
+   "time": "下周三前",
+   "place": "任意校区门口",
+   "desc": "版本不限，能看就行。",
+   "status": "open",
+   "publisher": "高数之神",
+   "acceptor": null,
+   "proof": null,
+   "scope": "world",
+   "school": "西山校区",
+   "createdAt": 1791447474651
+  },
+  {
+   "id": 1,
+   "title": "代取菜鸟驿站快递 3 件",
+   "cat": "代取",
+   "reward": 15,
+   "diff": 1,
+   "time": "今天 18:00 前",
+   "place": "宿舍区 7 栋",
+   "desc": "大件需小推车，报手机尾号 8848。",
+   "status": "open",
+   "publisher": "快递侠",
+   "acceptor": null,
+   "proof": null,
+   "scope": "camp",
+   "school": "东山校区",
+   "createdAt": 1791446874651
+  },
+  {
+   "id": 2,
+   "title": "高数期中押题讲解 2 小时",
+   "cat": "辅导",
+   "reward": 120,
+   "diff": 3,
+   "time": "本周六下午",
+   "place": "图书馆 3F",
+   "desc": "微分方程与级数，求大佬带飞。",
+   "status": "open",
+   "publisher": "快递侠",
+   "acceptor": null,
+   "proof": null,
+   "scope": "camp",
+   "school": "东山校区",
+   "createdAt": 1791443274651
+  },
+  {
+   "id": 3,
+   "title": "帮忙占周五早八前排 ×2",
+   "cat": "跑腿",
+   "reward": 10,
+   "diff": 1,
+   "time": "周五 07:40",
+   "place": "教学楼 A301",
+   "desc": "放两本书即可，靠谱的来。",
+   "status": "open",
+   "publisher": "高数之神",
+   "acceptor": null,
+   "proof": null,
+   "scope": "camp",
+   "school": "西山校区",
+   "createdAt": 1791441474651
+  },
+  {
+   "id": 1791450475838,
+   "title": "东山快递代取",
+   "cat": "代取",
+   "reward": 10,
+   "diff": 1,
+   "time": "协商确定",
+   "place": "校内",
+   "desc": "（无补充说明）",
+   "status": "open",
+   "publisher": "甲同学",
+   "acceptor": null,
+   "proof": null,
+   "scope": "camp",
+   "school": "东山校区",
+   "createdAt": 1791450475838
+  },
+  {
+   "id": 1791450475840,
+   "title": "跨区求带咖啡",
+   "cat": "跑腿",
+   "reward": 20,
+   "diff": 1,
+   "time": "协商确定",
+   "place": "校内",
+   "desc": "（无补充说明）",
+   "status": "submitted",
+   "publisher": "甲同学",
+   "acceptor": "乙同学",
+   "proof": {
+    "text": "咖啡放桌上了",
+    "img": null
+   },
+   "scope": "world",
+   "school": "东山校区",
+   "createdAt": 1791450475840
+  }
+ ],
+ "sessions": {
+  "6073f13a3f14d3252aff4ed88b4c521a": "甲同学",
+  "726f547632ed1eca21164ce159e4b87f": "乙同学"
+ }
+}

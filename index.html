@@ -91,6 +91,11 @@ body[data-theme="western"] .btn.pink{
 body[data-theme="western"] .btn.ghost{
   background:radial-gradient(circle at 35% 30%,#e9d9ac,#cdb278 60%,#a98f52);
   color:#3a2812;text-shadow:none;}
+.accept-btn.cancel{background:var(--panel2);color:var(--cardDim);margin-left:8px;}
+.accept-btn.cancel:hover{filter:brightness(1.15);}
+body[data-theme="western"] .accept-btn.cancel{
+  background:radial-gradient(circle at 35% 30%,#b8ab8f,#948868 60%,#77683f);
+  color:#f2e8d0;text-shadow:1px 1px 0 rgba(0,0,0,.4);}
 body[data-theme="western"] .accept-btn:disabled,body[data-theme="western"] .btn:disabled{
   background:radial-gradient(circle at 35% 30%,#9a9488,#6e685e 60%,#54504a);
   color:#d9d2c4;border-color:rgba(0,0,0,.4);text-shadow:none;cursor:not-allowed;}
@@ -212,6 +217,19 @@ body[data-theme="modern"] .field input,body[data-theme="modern"] .field select,b
 footer{text-align:center;color:var(--dim);font-size:11px;padding:30px;letter-spacing:2px;line-height:2;}
 footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 .auth-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.proof-tools{display:none;gap:10px;margin:10px 0 14px;}
+.proof-tools.show{display:flex;}
+.pbtn{cursor:pointer;font-family:inherit;font-size:11px;border:var(--cardBorder);border-radius:var(--radius);background:var(--panel2);color:var(--cardInk);padding:6px 12px;box-shadow:var(--shadow);}
+.pbtn:active{transform:translateY(2px);box-shadow:none;}
+.mine-wrap{max-width:1200px;margin:0 auto;padding:0 20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media(max-width:900px){.mine-wrap{grid-template-columns:1fr;}}
+.mine-wrap .panel h2{font-size:13px;}
+.cnt{color:var(--gold);font-size:12px;}
+.mrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:2px dashed rgba(128,128,128,.25);font-size:12px;flex-wrap:wrap;color:var(--cardInk);}
+.mrow:last-child{border-bottom:none;}
+.mrow .mt{flex:1;min-width:120px;}
+.mrow .mr{color:var(--gold);font-weight:bold;white-space:nowrap;}
+.mempty{color:var(--dim);font-size:12px;text-align:center;padding:24px 0;}
 </style>
 </head>
 <body data-theme="retro">
@@ -243,6 +261,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 <div class="main" id="board">
   <div class="panel">
     <h2 id="boardTitle">▣ QUEST BOARD · 悬赏板</h2>
+    <div class="tabs" id="scopeTabs"></div>
     <div class="tabs" id="tabs"></div>
     <div id="questList"></div>
   </div>
@@ -265,6 +284,13 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
       <button class="tab" id="tabReg" onclick="authMode='reg';renderAuthTabs()">注册</button>
     </div>
     <div class="field"><label>用户名</label><input id="aUser" maxlength="16" placeholder="2-16 位中英文/数字"></div>
+    <div class="field" id="schoolField" style="display:none"><label>校区阵营（注册后不可更改）</label>
+      <select id="aSchool">
+        <option value="东山校区">🏫 东山校区</option>
+        <option value="西山校区">🏫 西山校区</option>
+        <option value="南湖校区">🏫 南湖校区</option>
+        <option value="北湖校区">🏫 北湖校区</option>
+      </select></div>
     <div class="field"><label>密码</label><input id="aPass" type="password" placeholder="至少 6 位"></div>
     <div class="actions">
       <button class="btn ghost" style="margin-top:0" onclick="closeAuth()">取消</button>
@@ -284,6 +310,11 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
         <option value="辅导">📚 学习辅导</option><option value="悬赏">⚔️ 悬赏求助</option>
         <option value="其他">🎲 其他</option>
       </select></div>
+    <div class="field"><label>发布范围</label>
+      <select id="qScope">
+        <option value="camp">🏫 本校区（仅同校区可见）</option>
+        <option value="world">🌍 大世界（所有校区可见可接）</option>
+      </select></div>
     <div class="field"><label>悬赏金币（1 - 500）</label><input id="qReward" type="number" min="1" max="500" value="30"></div>
     <div class="field"><label>时限</label><input id="qTime" placeholder="例：今天 18:00 前"></div>
     <div class="field"><label>地点</label><input id="qPlace" placeholder="例：二食堂门口"></div>
@@ -291,6 +322,51 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
     <div class="actions">
       <button class="btn ghost" style="margin-top:0" onclick="closePublish()">取消</button>
       <button class="btn" style="margin-top:0" onclick="publishQuest()">确认发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- 我的任务总结 -->
+<div class="mine-wrap">
+  <div class="panel">
+    <h2>📮 我发布的任务 <span class="cnt" id="cntPub"></span></h2>
+    <div id="minePub"></div>
+  </div>
+  <div class="panel">
+    <h2>⚔️ 我接取的任务 <span class="cnt" id="cntAcc"></span></h2>
+    <div id="mineAcc"></div>
+  </div>
+  <div class="panel">
+    <h2>🏆 我完成的任务 <span class="cnt" id="cntDone"></span></h2>
+    <div id="mineDone"></div>
+  </div>
+</div>
+
+<!-- 交付凭证 -->
+<div class="modal-mask" id="proofMask">
+  <div class="modal">
+    <h3>▶ 提交交付凭证</h3>
+    <div class="field"><label>交付说明</label><textarea id="proofText" rows="3" placeholder="文字说明 / 取件码 / 链接……"></textarea></div>
+    <div class="field"><label>图片凭证（可选，自动压缩）</label><input id="proofImg" type="file" accept="image/*" onchange="previewProofImg(this)"></div>
+    <img id="proofPreview" style="display:none;max-width:100%;border:3px solid rgba(0,0,0,.3);border-radius:var(--radius);">
+    <div class="proof-tools" id="proofTools">
+      <button class="pbtn" onclick="rotateProofImg()">↻ 旋转 90°</button>
+      <button class="pbtn" onclick="removeProofImg()">✕ 移除图片</button>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" style="margin-top:0" onclick="closeProof()">取消</button>
+      <button class="btn" style="margin-top:0" onclick="doSubmitProof()">提交凭证</button>
+    </div>
+  </div>
+</div>
+
+<!-- 凭证大图查看器 -->
+<div class="modal-mask" id="lightbox" style="z-index:3000">
+  <div style="text-align:center">
+    <img id="lbImg" style="max-width:88vw;max-height:74vh;transition:transform .2s;border:4px solid rgba(255,255,255,.15);border-radius:6px;background:#111;">
+    <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
+      <button class="btn ghost" style="margin-top:0" onclick="rotateLightbox()">↻ 旋转</button>
+      <button class="btn pink" style="margin-top:0" onclick="closeLightbox()">✕ 关闭</button>
     </div>
   </div>
 </div>
@@ -356,27 +432,42 @@ async function initNet(){
 const CAT_ICON={"跑腿":"🏃","代取":"📦","辅导":"📚","悬赏":"⚔️","其他":"🎲"};
 const CATS=["全部","跑腿","代取","辅导","悬赏","其他"];
 let demo={
-  cat:'全部',
+  cat:'全部',scope:'camp',
   quests:[
-    {id:1,title:'代取菜鸟驿站快递 3 件',cat:'代取',reward:15,diff:1,time:'今天 18:00 前',place:'宿舍区 7 栋',desc:'大件需小推车，报尾号 8848。',status:'open',publisher:'快递侠',acceptor:null,proof:null},
-    {id:2,title:'高数期中押题讲解 2 小时',cat:'辅导',reward:120,diff:3,time:'本周六下午',place:'图书馆 3F',desc:'微分方程与级数，求大佬带飞。',status:'open',publisher:'高数之神',acceptor:null,proof:null},
-    {id:3,title:'帮忙占周五早八前排 ×2',cat:'跑腿',reward:10,diff:1,time:'周五 07:40',place:'教学楼 A301',desc:'放两本书即可。',status:'open',publisher:'快递侠',acceptor:null,proof:null},
-    {id:4,title:'英语演讲稿润色（800 词）',cat:'悬赏',reward:80,diff:2,time:'周日晚上前',place:'线上',desc:'已交付，五星好评。',status:'done',publisher:'高数之神',acceptor:'快递侠',proof:'润色稿已发送邮箱，附修改说明。'},
+    {id:1,title:'代取菜鸟驿站快递 3 件',cat:'代取',reward:15,diff:1,time:'今天 18:00 前',place:'宿舍区 7 栋',desc:'大件需小推车，报尾号 8848。',status:'open',publisher:'快递侠',acceptor:null,proof:null,scope:'camp',school:'东山校区'},
+    {id:2,title:'高数期中押题讲解 2 小时',cat:'辅导',reward:120,diff:3,time:'本周六下午',place:'图书馆 3F',desc:'微分方程与级数，求大佬带飞。',status:'open',publisher:'高数之神',acceptor:null,proof:null,scope:'camp',school:'西山校区'},
+    {id:3,title:'帮忙占周五早八前排 ×2',cat:'跑腿',reward:10,diff:1,time:'周五 07:40',place:'教学楼 A301',desc:'放两本书即可。',status:'open',publisher:'快递侠',acceptor:null,proof:null,scope:'camp',school:'东山校区'},
+    {id:4,title:'英语演讲稿润色（800 词）',cat:'悬赏',reward:80,diff:2,time:'周日晚上前',place:'线上',desc:'已交付，五星好评。',status:'done',publisher:'高数之神',acceptor:'快递侠',proof:'润色稿已发送邮箱，附修改说明。',scope:'camp',school:'西山校区'},
+    {id:5,title:'求带羽毛球拍穿线',cat:'其他',reward:25,diff:1,time:'本周内',place:'器材室',desc:'周六比赛急用。',status:'submitted',publisher:'路过的勇者',acceptor:'快递侠',proof:{text:'已穿好，拍子放器材室架子上。',img:null},scope:'camp',school:'东山校区'},
+    {id:6,title:'【跨区】收一本《操作系统》教材',cat:'悬赏',reward:40,diff:1,time:'下周三前',place:'任意校区门口',desc:'版本不限，能看就行。',status:'open',publisher:'高数之神',acceptor:null,proof:null,scope:'world',school:null},
   ],
   ranks:[{name:'高数之神',pt:3050},{name:'快递侠',pt:2180},{name:'占座大师',pt:990},{name:'图书馆幽灵',pt:640},{name:'路过的勇者',pt:100}],
-  me:{username:'路过的勇者',coins:320,rep:3}
+  me:{username:'路过的勇者',coins:320,rep:3,school:'东山校区'}
 };
 let quests=[],ranks=[];
 
 /* ================= 渲染 ================= */
 const $=id=>document.getElementById(id);
 function diffStars(n){return '★'.repeat(n)+'☆'.repeat(3-n);}
-function myName(){return online&&me?me.username:demo.me.username;}
+function myName(){return online?(me?me.username:null):demo.me.username;}
 function myInfo(){return online&&me?me:demo.me;}
 function renderTabs(){
-  $('tabs').innerHTML=CATS.map(c=>'<button class="tab '+((online?demo.cat:demo.cat)===c?'active':'')+'" onclick="setCat(\''+c+'\')">'+c+'</button>').join('');
+  renderScopeTabs();
+  $('tabs').innerHTML=CATS.map(c=>'<button class="tab '+(demo.cat===c?'active':'')+'" onclick="setCat(\''+c+'\')">'+c+'</button>').join('');
 }
 function setCat(c){demo.cat=c;renderAll();}
+function setScope(s){demo.scope=s;renderAll();}
+function viewerSchool(){return (online&&me)?(me.school||null):(!online?demo.me.school:null);}
+function visibleQuests(){
+  const vs=viewerSchool();
+  return quests.filter(q=>q.scope==='world'||(vs&&q.school===vs));
+}
+function renderScopeTabs(){
+  const vs=viewerSchool();
+  const tabs=[['world','🌍 大世界'],['camp','🏫 '+(vs||'我的校区')]];
+  $('scopeTabs').innerHTML=tabs.map(t=>
+    '<button class="tab '+(demo.scope===t[0]?'active':'')+'" onclick="setScope(\''+t[0]+'\')">'+t[1]+'</button>').join('');
+}
 function statusTag(q){
   const map={open:['● 招募中','open'],accepted:['◆ 进行中',''],submitted:['▣ 待确认',''],done:['■ 已完成','done'],me:['◆ 已接取','']};
   const m=map[q.status]||['',''];
@@ -388,22 +479,26 @@ function actionBtn(q){
   if(q.status==='open')
     return q.publisher===un?b('等待勇者接单…','', '',true):b('接受任务','onclick="acceptQuest('+q.id+',event)"');
   if(q.status==='accepted')
-    return q.acceptor===un?b('📤 交付凭证','onclick="submitProof('+q.id+')"'):b('进行中…','','',true);
+    return q.acceptor===un
+      ?b('📤 交付凭证','onclick="openProof('+q.id+')"')+b('↩ 取消接取','onclick="cancelQuest('+q.id+')"','cancel')
+      :b('进行中…','','',true);
   if(q.status==='submitted')
     return q.publisher===un?b('✔ 确认结算','onclick="confirmQuest('+q.id+',event)"','gold'):b('已交付，待确认','','',true);
   return b('已完成','','',true);
 }
 function renderQuests(){
   const cat=demo.cat;
-  const list=quests.filter(q=>cat==='全部'||q.cat===cat);
+  const list=visibleQuests()
+    .filter(q=>demo.scope==='world'?q.scope==='world':q.scope==='camp')
+    .filter(q=>cat==='全部'||q.cat===cat);
   $('questList').innerHTML=list.length?list.map(q=>
     '<div class="quest">'+
       '<div class="icon">'+CAT_ICON[q.cat]+'</div>'+
       '<div class="info"><div class="title">'+q.title+' '+statusTag(q)+'</div>'+
-      '<div class="meta"><span>'+q.cat+'</span><span class="stars">'+diffStars(q.diff)+'</span>'+
+      '<div class="meta"><span>'+q.cat+'</span><span>'+(q.scope==='world'?'🌍 大世界':'🏫 '+(q.school||'本校区'))+'</span><span class="stars">'+diffStars(q.diff)+'</span>'+
       '<span>⏱ '+q.time+'</span><span>📍 '+q.place+'</span><span>👤 '+q.publisher+'</span></div></div>'+
       '<div class="reward">🪙 '+q.reward+'</div>'+actionBtn(q)+
-      (q.proof?'<details><summary>📎 查看交付凭证</summary><div style="padding:8px 0">'+q.proof+'</div></details>':'')+
+      proofBlock(q)+
     '</div>').join('')
   :'<div style="text-align:center;color:var(--dim);padding:40px">暂无任务 <span class="blink">_</span></div>';
 }
@@ -416,8 +511,25 @@ function renderHUD(){
   $('coins').textContent=u.coins;$('rep').textContent=u.rep;
   $('lv').textContent=Math.floor(u.rep/5)+1;$('expbar').style.width=(u.rep%5)*20+'%';
   $('userTag').innerHTML=(online&&me)
-    ?'🎮 '+me.username+' <a href="javascript:logout()" style="color:var(--pink)">[退出]</a>'
+    ?'🎮 '+me.username+' · 🏫'+me.school+' <a href="javascript:logout()" style="color:var(--pink)">[退出]</a>'
     :'<a href="javascript:openAuth()" style="color:var(--cyan)">登录 / 注册</a>';
+}
+function mrow(q,withActions){
+  return '<div class="mrow"><span class="mt">'+q.title+'</span>'
+    +(withActions?actionBtn(q):'')
+    +'<span class="mr">🪙 '+q.reward+'</span></div>';
+}
+function renderMine(){
+  const un=myName();
+  const pub=quests.filter(q=>q.publisher===un);
+  const acc=quests.filter(q=>q.acceptor===un&&q.status!=='done');
+  const done=quests.filter(q=>q.acceptor===un&&q.status==='done');
+  $('cntPub').textContent='× '+pub.length;
+  $('cntAcc').textContent='× '+acc.length;
+  $('cntDone').textContent='× '+done.length;
+  $('minePub').innerHTML=pub.length?pub.map(q=>mrow(q,true)).join(''):'<div class="mempty">还没有发布过悬赏</div>';
+  $('mineAcc').innerHTML=acc.length?acc.map(q=>mrow(q,true)).join(''):'<div class="mempty">还没有接取任务</div>';
+  $('mineDone').innerHTML=done.length?done.map(q=>mrow(q,false)).join(''):'<div class="mempty">完成悬赏后在此领取荣誉</div>';
 }
 async function renderAll(){
   if(online){
@@ -428,7 +540,7 @@ async function renderAll(){
     }catch(e){toast('✘ '+e.message);online=false;}
   }
   if(!online){quests=demo.quests;ranks=demo.ranks;}
-  renderTabs();renderQuests();renderRank();renderHUD();
+  renderTabs();renderQuests();renderRank();renderHUD();renderMine();
 }
 
 /* ================= 账号 ================= */
@@ -437,13 +549,17 @@ function closeAuth(){$('authMask').classList.remove('show');}
 function renderAuthTabs(){
   $('tabLogin').classList.toggle('active',authMode==='login');
   $('tabReg').classList.toggle('active',authMode==='reg');
+  $('schoolField').style.display=authMode==='reg'?'block':'none';
 }
 async function doAuth(){
   const u=$('aUser').value.trim(),p=$('aPass').value;
   try{
     if(!API)throw new Error('请先点页脚「⚙ 服务器设置」填写后端地址（离线模式无需账号）');
+    const body=authMode==='login'
+      ?{username:u,password:p}
+      :{username:u,password:p,school:$('aSchool').value};
     const r=await api(authMode==='login'?'/api/login':'/api/register',
-      {method:'POST',body:JSON.stringify({username:u,password:p})});
+      {method:'POST',body:JSON.stringify(body)});
     token=r.token;me=r.user;online=true;
     localStorage.setItem('cq_token',token);
     beep(660);setTimeout(()=>beep(990),80);
@@ -461,7 +577,7 @@ function openPublish(){
 function closePublish(){$('pubMask').classList.remove('show');}
 async function publishQuest(){
   const data={title:$('qTitle').value,cat:$('qCat').value,reward:$('qReward').value,
-    time:$('qTime').value,place:$('qPlace').value,desc:$('qDesc').value};
+    time:$('qTime').value,place:$('qPlace').value,desc:$('qDesc').value,scope:$('qScope').value};
   try{
     if(online){
       const r=await api('/api/quests',{method:'POST',body:JSON.stringify(data)});
@@ -474,7 +590,8 @@ async function publishQuest(){
       demo.me.coins-=r;demo.me.rep+=1;
       demo.quests.unshift({id:Date.now(),title:data.title.trim(),cat:data.cat,reward:r,
         diff:r>80?3:(r>30?2:1),time:data.time||'协商确定',place:data.place||'校内',
-        desc:data.desc.trim()||'（无补充说明）',status:'open',publisher:demo.me.username,acceptor:null,proof:null});
+        desc:data.desc.trim()||'（无补充说明）',status:'open',publisher:demo.me.username,acceptor:null,proof:null,
+        scope:data.scope==='world'?'world':'camp',school:data.scope==='world'?null:demo.me.school});
     }
     beep(660);setTimeout(()=>beep(990),80);
     toast('✔ 悬赏已张贴！');
@@ -495,13 +612,84 @@ async function acceptQuest(id){
   }catch(e){toast('✘ '+e.message);beep(220,.15);}
 }
 function patchQuest(q){const i=quests.findIndex(x=>x.id===q.id);if(i>-1)quests[i]=q;else quests.unshift(q);}
-async function submitProof(id){
-  const proof=prompt('填写交付说明（凭证文字 / 链接 / 取件码等）：');
-  if(!proof||!proof.trim())return;
+function proofBlock(q){
+  if(!q.proof)return '';
+  const pr=q.proof;
+  const txt=typeof pr==='string'?pr:(pr.text||'');
+  const img=typeof pr==='object'?pr.img:null;
+  return '<details><summary>📎 查看交付凭证</summary><div style="padding:8px 0">'
+    +(txt?'<div>'+txt+'</div>':'')
+    +(img?'<img src="'+img+'" onclick="openLightbox(this.src)" title="点击放大" style="max-width:260px;display:block;margin-top:10px;border:3px solid rgba(0,0,0,.3);border-radius:var(--radius);cursor:zoom-in">':'')
+    +'</div></details>';
+}
+let _proofId=null,_proofImgData=null,_proofRot=0;
+function openProof(id){_proofId=id;_proofImgData=null;_proofRot=0;$('proofText').value='';$('proofImg').value='';$('proofPreview').style.display='none';$('proofTools').classList.remove('show');$('proofMask').classList.add('show');}
+function closeProof(){$('proofMask').classList.remove('show');}
+function previewProofImg(input){
+  const f=input.files&&input.files[0];
+  if(!f){_proofImgData=null;$('proofPreview').style.display='none';return;}
+  compressImage(f).then(d=>{_proofImgData=d;_proofRot=0;$('proofPreview').src=d;$('proofPreview').style.transform='';$('proofPreview').style.display='block';$('proofTools').classList.add('show');})
+    .catch(()=>{toast('✘ 图片读取失败');_proofImgData=null;});
+}
+function compressImage(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{const img=new Image();
+      img.onload=()=>{const max=800;let w=img.width,hh=img.height;
+        if(w>max){hh=hh*max/w;w=max;}
+        const c=document.createElement('canvas');c.width=w;c.height=hh;
+        c.getContext('2d').drawImage(img,0,0,w,hh);
+        res(c.toDataURL('image/jpeg',.72));};
+      img.onerror=rej;img.src=e.target.result;};
+    r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+function rotateDataURL(dataURL){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{const c=document.createElement('canvas');
+      c.width=img.height;c.height=img.width;
+      const ctx=c.getContext('2d');
+      ctx.translate(c.width/2,c.height/2);ctx.rotate(Math.PI/2);
+      ctx.drawImage(img,-img.width/2,-img.height/2);
+      res(c.toDataURL('image/jpeg',.72));};
+    img.onerror=rej;img.src=dataURL;
+  });
+}
+async function rotateProofImg(){
+  if(!_proofImgData)return;
   try{
-    if(online){const r=await api('/api/quests/'+id+'/submit',{method:'POST',body:JSON.stringify({proof})});patchQuest(r.quest);}
-    else{const q=demo.quests.find(x=>x.id===id);q.proof=proof.trim();q.status='submitted';}
-    beep(880);toast('📤 凭证已提交，等待发布者确认');renderAll();
+    _proofImgData=await rotateDataURL(_proofImgData);
+    _proofRot=(_proofRot+90)%360;
+    $('proofPreview').src=_proofImgData;
+    beep(700,.05);
+  }catch(e){toast('✘ 旋转失败');}
+}
+function removeProofImg(){
+  _proofImgData=null;_proofRot=0;
+  $('proofImg').value='';$('proofPreview').style.display='none';$('proofTools').classList.remove('show');
+}
+let _lbRot=0;
+function openLightbox(src){_lbRot=0;$('lbImg').style.transform='';$('lbImg').src=src;$('lightbox').classList.add('show');}
+function closeLightbox(){$('lightbox').classList.remove('show');$('lbImg').src='';}
+function rotateLightbox(){_lbRot=(_lbRot+90)%360;$('lbImg').style.transform='rotate('+_lbRot+'deg)';}
+async function doSubmitProof(){
+  const id=_proofId;
+  const text=$('proofText').value.trim();
+  const img=_proofImgData;
+  if(!text&&!img){toast('✘ 请填写说明或上传图片');beep(220,.15);return;}
+  try{
+    if(online){const r=await api('/api/quests/'+id+'/submit',{method:'POST',body:JSON.stringify({proof:{text:text,img:img}})});patchQuest(r.quest);}
+    else{const q=demo.quests.find(x=>x.id===id);q.proof={text:text,img:img};q.status='submitted';}
+    beep(880);toast('📤 凭证已提交，等待发布者确认');closeProof();renderAll();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+async function cancelQuest(id){
+  if(!confirm('确定放弃这个任务吗？任务将重新开放给其他猎人。'))return;
+  try{
+    if(online){const r=await api('/api/quests/'+id+'/cancel',{method:'POST'});patchQuest(r.quest);}
+    else{const q=demo.quests.find(x=>x.id===id);if(q.acceptor!==demo.me.username)return;q.status='open';q.acceptor=null;q.proof=null;}
+    beep(440,.1);toast('↩ 已取消接取，任务重新开放');renderAll();
   }catch(e){toast('✘ '+e.message);beep(220,.15);}
 }
 async function confirmQuest(id){
@@ -532,8 +720,10 @@ function toast(msg){
   void t.offsetWidth;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();}});
-(async()=>{await initNet();renderAll();})();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();}});
+(async()=>{await initNet();
+$('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))closeLightbox();});
+renderAll();})();
 </script>
 </body>
 </html>

@@ -1,6 +1,11 @@
 # Campus Quest · 校园悬赏平台
 
-游戏风校园悬赏站，含账号系统、金币结算、交付确认流与三套主题（复古街机 / 海贼王式悬赏令 / 现代简约）。
+游戏风校园悬赏站：账号系统、校区阵营隔离、大世界跨区任务、金币结算、图片凭证、三套主题（复古街机 / 海贼王式悬赏令 / 现代简约）。
+
+## 阵营系统
+- 注册时选择校区阵营（东山/西山/南湖/北湖），不可更改
+- 发布悬赏可选范围：**本校区**（仅同阵营可见）或 **大世界**（全服可见可接）
+- 未登录游客只能看到大世界任务；凭证仅交易双方可见
 
 ## 目录结构
 ```
@@ -38,10 +43,11 @@ backend/package.json  后端启动配置
 | POST | /api/register | 注册（初始 100 金币） |
 | POST | /api/login | 登录 |
 | GET | /api/me | 当前用户 |
-| GET | /api/quests | 任务列表 |
+| GET | /api/quests | 任务列表（凭证仅发布者/接取者可见） |
 | POST | /api/quests | 发布悬赏（扣金币） |
 | POST | /api/quests/:id/accept | 接取任务 |
-| POST | /api/quests/:id/submit | 提交交付凭证 |
+| POST | /api/quests/:id/submit | 提交交付凭证（文字 + 图片，前端自动压缩） |
+| POST | /api/quests/:id/cancel | 接取者取消任务，任务重新开放 |
 | POST | /api/quests/:id/confirm | 发布者确认 → 金币结算 |
 | GET | /api/rank | 排行榜 |
 
