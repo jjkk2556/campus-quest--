@@ -493,6 +493,20 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
   </div>
 </div>
 
+<!-- 再次开发 -->
+<div class="modal-mask" id="redevMask">
+  <div class="modal" style="max-width:440px">
+    <button class="mx" onclick="closeRedev()">✕</button>
+    <h3>🔧 再次开发 · <span id="redevName"></span></h3>
+    <div class="cert-banner">在原代码基础上迭代修改，不推倒重来，Token 消耗最小。</div>
+    <div class="field"><label>新的要求</label><textarea id="redevIn" rows="3" maxlength="200" placeholder="例：把选项改成 A/B/C，再加一个倒计时"></textarea></div>
+    <div class="actions">
+      <button class="btn ghost" style="margin-top:0" onclick="closeRedev()">取消</button>
+      <button class="btn" style="margin-top:0" onclick="doRedev()">迭代生成</button>
+    </div>
+  </div>
+</div>
+
 <!-- 凭证大图查看器 -->
 <div class="modal-mask" id="lightbox" style="z-index:3000">
   <div style="text-align:center">
@@ -1110,6 +1124,52 @@ async function showKimiModels(){
       '</div><span style="color:var(--dim)">复制想要的型号 → 填到环境变量 KIMI_MODEL → 重新部署</span>';
   }catch(e){el.innerHTML='⚠️ '+esc(e.message);}
 }
+function canManageApp(a){
+  const me=myName();
+  if(!me)return false;
+  if(a.creator===me)return true;
+  const c=communities.find(x=>String(x.id)===String(commView));
+  return !!(c&&c.creator===me);
+}
+function manageBtns(a,withRedev){
+  if(!canManageApp(a))return '';
+  return '<div style="margin:0 0 6px">'+
+    (withRedev?'<button class="pbtn" onclick="openRedev('+a.id+')">🔧 再次开发</button> ':'')+
+    '<button class="pbtn" onclick="delApp('+a.id+')">🗑 删除</button></div>';
+}
+function openRedev(id){
+  const a=commApps.find(x=>x.id===id);
+  if(!a)return;
+  if(!a.code)return toast('✘ 旧版数据工具不支持迭代，请删除后重新生成');
+  _redevId=id;
+  $('redevName').textContent=a.title;
+  $('redevIn').value='';
+  $('redevMask').classList.add('show');
+}
+function closeRedev(){$('redevMask').classList.remove('show');}
+async function doRedev(){
+  const prompt=$('redevIn').value.trim();
+  if(!prompt)return toast('✘ 请填写新的要求');
+  try{
+    if(!online)throw new Error('离线试玩暂不支持，请连接服务器');
+    await api('/api/apps/'+_redevId+'/redev',{method:'POST',body:JSON.stringify({prompt:prompt})});
+    beep(880);toast('✔ 迭代完成，已生成新版');
+    closeRedev();loadComm();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+async function delApp(id){
+  if(!confirm('确定删除这个小工具？其投票/抽签数据会一并清除。'))return;
+  try{
+    if(online){await api('/api/apps/'+id+'/delete',{method:'POST',body:'{}'});}
+    else{
+      const com=demo.communities.find(x=>String(x.id)===String(commView));
+      const i=(com.apps||[]).findIndex(x=>x.id===id);
+      if(i>-1)com.apps.splice(i,1);
+    }
+    delete _toolWrapCache[String(commView)];
+    beep(440,.08);toast('🗑 已删除');loadComm();
+  }catch(e){toast('✘ '+e.message);beep(220,.1);}
+}
 function openCommTool(){commTool=true;loadComm();refreshAiStatus();}
 function toolPanelHTML(){
   return '<button class="pbtn" style="margin-bottom:10px" onclick="commTool=false;loadComm()">◀ 返回聊天</button>'+
@@ -1160,7 +1220,7 @@ function mountSandboxes(){
     return;
   }
   if(!window.__sandboxReady||!window.__mountSandpack){
-    if(_spRetry++<400){setTimeout(mountSandboxes,500);}
+    if(_spRetry++<40){setTimeout(mountSandboxes,500);}
     else{
       todo.forEach(a=>{const el=document.getElementById('sp-'+a.id);
         if(el&&el.dataset.m!=='1'){el.dataset.m='1';
@@ -1175,6 +1235,7 @@ function appCard(a){
   if(a.code){
     return '<div class="shop-card" style="text-align:left"><div class="nm">🧩 '+esc(a.title)+'</div>'+
     '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:6px">by '+esc(a.creator)+' · '+(a.engine==='kimi'?'Kimi AI 生成':'内置示例')+'</div>'+
+    manageBtns(a,true)+
     '<div id="sp-'+a.id+'" style="min-height:120px"><div class="mempty">沙箱加载中…（首次加载约 1-3MB，国内 CDN）</div></div></div>';
   }
   if(a.type==='vote'){
@@ -1187,6 +1248,7 @@ function appCard(a){
     const btns=a.options.map((o,i)=>'<button class="accept-btn" style="margin:2px 4px 2px 0" onclick="voteApp('+a.id+','+i+')">'+esc(o)+'</button>').join('');
     return '<div class="shop-card" style="text-align:left"><div class="nm">🗳️ '+esc(a.title)+'</div>'+
     '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:4px">by '+esc(a.creator)+' · '+a.total+' 人投票</div>'+
+    manageBtns(a,false)+
     bars+btns+'<div style="font-size:10px;color:var(--dim);margin-top:4px">点击选项投票，可改票</div></div>';
   }
   const drawn=a.myDraw;
@@ -1227,7 +1289,7 @@ async function drawApp(id){
 }
 
 /* ================= 社区 ================= */
-let commTab='world',commView=null,commTimer=null,communities=[],cert=false,chatMsgs=[],_commKey=null,commTool=false,commApps=[],drawingId=null;
+let commTab='world',commView=null,commTimer=null,communities=[],cert=false,chatMsgs=[],_commKey=null,commTool=false,commApps=[],drawingId=null,_toolWrapCache={},_redevId=null;
 function openComm(){
   if(online&&!me){toast('请先登录再进入社区');openAuth();return;}
   $('commMask').classList.add('show');commView=null;renderCommTabs();startCommPoll();
@@ -1325,8 +1387,16 @@ function renderCommBody(){
       '<div style="margin-top:10px;text-align:center"><button class="pbtn" onclick="openCommTool()">🧰 社区工具（AI 工坊）</button></div>';
     renderChatMsgs();
   }else{
-    $('commBody').innerHTML=toolPanelHTML();
+    const cached=_toolWrapCache[String(commView)];
+    if(cached&&cached.querySelector('#appCards')){
+      $('commBody').innerHTML='';
+      $('commBody').appendChild(cached);
+    }else{
+      $('commBody').innerHTML='<div id="toolWrap">'+toolPanelHTML()+'</div>';
+      _toolWrapCache[String(commView)]=$('toolWrap');
+    }
     renderAppCards();
+    refreshAiStatus();
   }
 }
 function openCommChat(id){commView=id;loadComm();}
@@ -1377,7 +1447,7 @@ function toast(msg){
   void t.offsetWidth;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();closeShop();closeList();closeItem();closeComm();closeBag();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();closeShop();closeList();closeItem();closeComm();closeBag();closeRedev();}});
 (async()=>{await initNet();
 $('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))closeLightbox();});
 renderAll();})();

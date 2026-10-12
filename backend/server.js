@@ -170,19 +170,21 @@ function parseToolJson(txt) {
   } catch (e) { return null; }
 }
 let lastKimiErr = null;
-async function genByKimi(prompt) {
+async function genByKimi(prompt, base) {
   if (!KIMI_KEY) return null;
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 3000000);
+    const timer = setTimeout(() => ctrl.abort(), 30000);
     const r = await fetch('https://api.moonshot.cn/v1/chat/completions', {
       method: 'POST', signal: ctrl.signal,
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KIMI_KEY },
       body: JSON.stringify({
-        model: KIMI_MODEL, temperature: 1, response_format: { type: 'json_object' },
+        model: KIMI_MODEL, temperature: 0.2, response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: '你是"AI工坊"的代码生成器。用户用自然语言描述想要的任意小工具，你输出一个 JSON 对象（不要输出任何其他文字）：{"type":"简短英文标识","title":"工具名称（中文，不超过15字）","code":"完整的 React 函数组件源码"}。对 code 的要求：1) 一个默认导出（export default）的 React 函数组件；2) 可使用 import { useState, useEffect } from "react" 等 Hook；3) 样式全部用内联 style，深色背景 #1a1a2b 配浅色文字；4) 不引用任何外部库、图片 URL 或本地文件；5) 单文件、可直接编译运行，尽量不超过 120 行；6) 组件要有完整的交互闭环。用户输入：' },
-          { role: 'user', content: String(prompt || '').slice(0, 300) }
+          { role: 'system', content: '你是"AI工坊"的代码生成器。用户用自然语言描述想要的任意小工具，你输出一个 JSON 对象（不要输出任何其他文字）：{"type":"简短英文标识","title":"工具名称（中文，不超过15字）","code":"完整的 React 函数组件源码"}。对 code 的要求：1) 一个默认导出（export default）的 React 函数组件；2) 可使用 import { useState, useEffect } from "react" 等 Hook；3) 样式全部用内联 style，深色背景 #1a1a2b 配浅色文字；4) 不引用任何外部库、图片 URL 或本地文件；5) 单文件、可直接编译运行，尽量不超过 120 行；6) 组件要有完整的交互闭环。' },
+          { role: 'user', content: base
+            ? ('以下是一个已存在的 React 小工具源码，请基于它做迭代：保持原有功能与整体结构，只按用户的新需求做最小必要修改，输出完整新版 JSON（不要输出任何其他文字）。\n\n【现有代码】\n' + base.code + '\n\n【用户的新需求】' + String(prompt || '')).slice(0, 24000)
+            : String(prompt || '').slice(0, 300) }
         ]
       })
     });
@@ -526,7 +528,7 @@ const server=http.createServer(async(req,res)=>{
   else if(m==='POST'&&/^\/api\/apps\/\d+\/vote$/.test(p)){
     if(needUser())return;
     const app=db.communityApps.find(x=>String(x.id)===p.match(/\d+/)[0]);
-    if(!app||app.spec.type!=='vote')return send({error:'应用不存在'},404);
+    if(!app||app.spec.type!=='vote'||app.spec.code)return send({error:'该应用不支持投票'},404);
     const com=db.communities.find(x=>String(x.id)===app.communityId);
     if(!com||!com.members.includes(user.username))return send({error:'你还未加入该社区'},403);
     const ch=parseInt(data.choice);
@@ -538,7 +540,7 @@ const server=http.createServer(async(req,res)=>{
   else if(m==='POST'&&/^\/api\/apps\/\d+\/draw$/.test(p)){
     if(needUser())return;
     const app=db.communityApps.find(x=>String(x.id)===p.match(/\d+/)[0]);
-    if(!app||app.spec.type!=='fortune')return send({error:'应用不存在'},404);
+    if(!app||app.spec.type!=='fortune'||app.spec.code)return send({error:'该应用不支持抽签'},404);
     const com=db.communities.find(x=>String(x.id)===app.communityId);
     if(!com||!com.members.includes(user.username))return send({error:'你还未加入该社区'},403);
     const key=app.id+':'+user.username;
@@ -561,6 +563,31 @@ const server=http.createServer(async(req,res)=>{
       if(!r.ok)return send({error:'查询失败：HTTP '+r.status+' '+(d.error&&d.error.message||'')},502);
       send({models:(d.data||[]).map(x=>x.id)});
     }catch(e){send({error:'查询失败：'+String(e&&e.message||e).slice(0,100)},502);}
+  }
+  else if(m==='POST'&&/^\/api\/apps\/\d+\/redev$/.test(p)){
+    if(needUser())return;
+    const app=db.communityApps.find(x=>String(x.id)===p.match(/\d+/)[0]);
+    if(!app||!app.spec.code)return send({error:'应用不存在'},404);
+    const com=db.communities.find(x=>String(x.id)===app.communityId);
+    if(!com||!com.members.includes(user.username))return send({error:'你还未加入该社区'},403);
+    if(app.creator!==user.username&&com.creator!==user.username)return send({error:'只有应用创建者或社区主可以迭代'},403);
+    if(!KIMI_KEY)return send({error:'「再次开发」需要配置 KIMI_API_KEY'},400);
+    const spec=await genByKimi(String(data.prompt||''),app.spec);
+    if(!spec)return send({error:'Kimi 迭代失败：'+(lastKimiErr||'返回无法解析')},502);
+    app.spec=spec;app.engine='kimi';save();send({app:app,engine:'kimi'});
+  }
+  else if(m==='POST'&&/^\/api\/apps\/\d+\/delete$/.test(p)){
+    if(needUser())return;
+    const i=db.communityApps.findIndex(x=>String(x.id)===p.match(/\d+/)[0]);
+    if(i<0)return send({error:'应用不存在'},404);
+    const app=db.communityApps[i];
+    const com=db.communities.find(x=>String(x.id)===app.communityId);
+    const can=app.creator===user.username||(com&&com.creator===user.username);
+    if(!can)return send({error:'只有应用创建者或社区主可以删除'},403);
+    db.communityApps.splice(i,1);
+    db.appVotes=db.appVotes.filter(v=>v.appId!==app.id);
+    for(const k in db.appDraws)if(k.startsWith(app.id+':'))delete db.appDraws[k];
+    save();send({ok:true});
   }
   else if(m==='GET'&&p==='/api/rank'){
     send({ranks:[...db.users].sort((a,b)=>b.rep*50+b.coins-(a.rep*50+a.coins)).slice(0,5)
