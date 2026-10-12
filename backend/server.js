@@ -174,7 +174,7 @@ async function genByKimi(prompt) {
   if (!KIMI_KEY) return null;
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 30000);
+    const timer = setTimeout(() => ctrl.abort(), 3000000);
     const r = await fetch('https://api.moonshot.cn/v1/chat/completions', {
       method: 'POST', signal: ctrl.signal,
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KIMI_KEY },
