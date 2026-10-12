@@ -1153,9 +1153,48 @@ function renderAppCards(){
 function mountSandboxes(){
   const todo=commApps.filter(a=>a.code&&document.getElementById('sp-'+a.id));
   if(!todo.length)return;
-  if(!window.__mountSandpack){if(_spRetry++<15){setTimeout(mountSandboxes,800);}return;}
+  if(window.__sandboxFail){
+    todo.forEach(a=>{const el=document.getElementById('sp-'+a.id);
+      if(el&&el.dataset.m!=='1'){el.dataset.m='1';
+        el.innerHTML='<div class="mempty">沙箱依赖加载失败：当前网络无法访问 bootcdn / staticfile / unpkg，请换网络环境</div>';}});
+    return;
+  }
+  if(!window.__sandboxReady||!window.__mountSandpack){
+    if(_spRetry++<40){setTimeout(mountSandboxes,500);}
+    else{
+      todo.forEach(a=>{const el=document.getElementById('sp-'+a.id);
+        if(el&&el.dataset.m!=='1'){el.dataset.m='1';
+          el.innerHTML='<div class="mempty">沙箱加载超时，请刷新重试</div>';}});
+    }
+    return;
+  }
   _spRetry=0;
   todo.forEach(a=>window.__mountSandpack(a.id,a.code));
+}
+function appCard(a){
+  if(a.code){
+    return '<div class="shop-card" style="text-align:left"><div class="nm">🧩 '+esc(a.title)+'</div>'+
+    '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:6px">by '+esc(a.creator)+' · '+(a.engine==='kimi'?'Kimi AI 生成':'内置示例')+'</div>'+
+    '<div id="sp-'+a.id+'" style="min-height:120px"><div class="mempty">沙箱加载中…（首次加载约 1-3MB，国内 CDN）</div></div></div>';
+  }
+  if(a.type==='vote'){
+    const bars=a.options.map((o,i)=>{
+      const n=a.tally[i]||0;
+      const pct=a.total?Math.round(n/a.total*100):0;
+      return '<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:11px"><span>'+esc(o)+(a.myVote===i?' ✔':'')+'</span><span>'+n+' 票 · '+pct+'%</span></div>'+
+      '<div style="height:10px;background:rgba(0,0,0,.2);border-radius:var(--radius);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--cyan);transition:width .3s"></div></div></div>';
+    }).join('');
+    const btns=a.options.map((o,i)=>'<button class="accept-btn" style="margin:2px 4px 2px 0" onclick="voteApp('+a.id+','+i+')">'+esc(o)+'</button>').join('');
+    return '<div class="shop-card" style="text-align:left"><div class="nm">🗳️ '+esc(a.title)+'</div>'+
+    '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:4px">by '+esc(a.creator)+' · '+a.total+' 人投票</div>'+
+    bars+btns+'<div style="font-size:10px;color:var(--dim);margin-top:4px">点击选项投票，可改票</div></div>';
+  }
+  const drawn=a.myDraw;
+  return '<div class="shop-card" style="text-align:center"><div class="nm">🎋 '+esc(a.title)+'</div>'+
+   '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:8px">by '+esc(a.creator)+'</div>'+
+   (drawn
+     ?'<div style="padding:14px 6px;border:2px dashed var(--gold);border-radius:var(--radius);margin-bottom:8px"><div style="font-size:26px;font-weight:bold;color:var(--gold)">'+drawn.lv+'</div><div style="font-size:12px;margin-top:6px;line-height:1.7">'+esc(drawn.text)+'</div></div><div style="font-size:10px;color:var(--dim)">今日已抽，明天再来</div>'
+     :'<button class="btn" style="margin:0" '+(drawingId===a.id?'disabled':'')+' onclick="drawApp('+a.id+')">'+(drawingId===a.id?'🎋 摇签中…':'🎋 抽一签')+'</button>')+'</div>';
 }
 async function voteApp(id,choice){
   try{
@@ -1343,37 +1382,81 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePu
 $('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))closeLightbox();});
 renderAll();})();
 </script>
-<script type="importmap">
-{"imports":{"react":"https://esm.sh/react@18.3.1","react-dom":"https://esm.sh/react-dom@18.3.1","react-dom/client":"https://esm.sh/react-dom@18.3.1/client","@codesandbox/sandpack-react":"https://esm.sh/@codesandbox/sandpack-react@2?external=react,react-dom"}}
-</script>
-<link rel="stylesheet" href="https://esm.sh/@codesandbox/sandpack-react@2/dist/index.css">
-<script type="module">
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { Sandpack } from "@codesandbox/sandpack-react";
-const roots = new Map();
-window.__unmountAllSandpacks = function () {
-  roots.forEach(function (r) { try { r.unmount(); } catch (e) {} });
-  roots.clear();
-};
-window.__mountSandpack = function (id, code) {
-  const el = document.getElementById("sp-" + id);
-  if (!el) return;
-  const old = roots.get(id);
-  if (old) { try { old.unmount(); } catch (e) {} roots.delete(id); }
-  try {
-    const root = createRoot(el);
-    roots.set(id, root);
-    root.render(React.createElement(Sandpack, {
-      template: "react",
-      files: { "/App.js": { code: code, active: true } },
-      theme: "dark",
-      options: { showTabs: false, editorHeight: 260, showConsoleButton: true }
-    }));
-  } catch (e) {
-    el.innerHTML = '<div style="font-size:11px;color:#888;padding:12px">沙箱加载失败：' + (e && e.message) + '</div>';
+<script>
+(function () {
+  var SP_CDN = {
+    react: [
+      "https://cdn.bootcdn.net/ajax/libs/react/18.3.1/umd/react.production.min.js",
+      "https://cdn.staticfile.org/react/18.3.1/umd/react.production.min.js",
+      "https://unpkg.com/react@18.3.1/umd/react.production.min.js"
+    ],
+    reactdom: [
+      "https://cdn.bootcdn.net/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js",
+      "https://cdn.staticfile.org/react-dom/18.3.1/umd/react-dom.production.min.js",
+      "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"
+    ],
+    babel: [
+      "https://cdn.bootcdn.net/ajax/libs/babel-standalone/7.23.5/babel.min.js",
+      "https://cdn.staticfile.org/babel-standalone/7.23.5/babel.min.js",
+      "https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"
+    ]
+  };
+  window.__spUrls = {};
+  function loadChain(list, idx, done, key) {
+    if (idx >= list.length) { window.__sandboxFail = true; return; }
+    var sc = document.createElement("script");
+    sc.src = list[idx];
+    sc.onload = function () { window.__spUrls[key] = list[idx]; done(); };
+    sc.onerror = function () { loadChain(list, idx + 1, done, key); };
+    (document.head || document.getElementsByTagName("head")[0]).appendChild(sc);
   }
-};
+  loadChain(SP_CDN.react, 0, function () {
+    loadChain(SP_CDN.reactdom, 0, function () {
+      loadChain(SP_CDN.babel, 0, function () { window.__sandboxReady = true; }, "babel");
+    }, "reactdom");
+  }, "react");
+  window.__unmountAllSandpacks = function () {
+    var fs = document.querySelectorAll("iframe[data-sp]");
+    for (var t = 0; t < fs.length; t++) { if (fs[t].parentNode) fs[t].parentNode.removeChild(fs[t]); }
+  };
+  window.__mountSandpack = function (id, code) {
+    var el = document.getElementById("sp-" + id);
+    if (!el || el.dataset.m === "1") return;
+    el.dataset.m = "1";
+    var u = window.__spUrls || {};
+    var codeJson = JSON.stringify(String(code)).replace(/<\/script/g, "<\\/script");
+    var runner = "try{"
+      + "var code=" + codeJson + ";"
+      + "var transformed=Babel.transform(code,{presets:['react','env']}).code;"
+      + "var module={exports:{}};"
+      + "var fn=new Function('React','ReactDOM','module','exports','require',transformed+';return (typeof App!==\"undefined\"&&App)||exports.default||(module.exports&&module.exports.default)||null;');"
+      + "var Comp=fn(React,ReactDOM,module,module.exports,function(n){return n===\"react\"?React:null;});"
+      + "if(!Comp)throw new Error(String.fromCharCode(32452,20214,26410,23548,20986)+' export default');"
+      + "ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(Comp));"
+      + "parent.postMessage({spOk:" + id + "},'*');"
+      + "}catch(e){parent.postMessage({spError:" + id + ",msg:String(e&&e.message||e).slice(0,300)},'*')}";
+    var doc = "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+      + "<script src='" + u.react + "'><\/script>"
+      + "<script src='" + u.reactdom + "'><\/script>"
+      + "<script src='" + u.babel + "'><\/script>"
+      + "<style>body{margin:0;background:#1a1a2b}</style>"
+      + "</head><body><div id='root'></div><scr" + "ipt>" + runner + "</scr" + "ipt></body></html>";
+    el.innerHTML = "";
+    var f = document.createElement("iframe");
+    f.setAttribute("data-sp", id);
+    f.setAttribute("sandbox", "allow-scripts");
+    f.style.cssText = "width:100%;height:340px;border:none;display:block;background:#1a1a2b";
+    f.srcdoc = doc;
+    el.appendChild(f);
+  };
+  window.addEventListener("message", function (e) {
+    var d = e.data || {};
+    if (d.spError !== undefined) {
+      var el = document.getElementById("sp-" + d.spError);
+      if (el) el.innerHTML = "<div style='font-size:11px;color:#f88;padding:10px;word-break:break-all'>应用运行错误：" + String(d.msg).slice(0, 200) + "</div>";
+    }
+  });
+})();
 </script>
 </body>
 </html>
