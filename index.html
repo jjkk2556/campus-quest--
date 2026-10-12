@@ -1220,7 +1220,7 @@ function mountSandboxes(){
     return;
   }
   if(!window.__sandboxReady||!window.__mountSandpack){
-    if(_spRetry++<40){setTimeout(mountSandboxes,500);}
+    if(_spRetry++<400){setTimeout(mountSandboxes,500);}
     else{
       todo.forEach(a=>{const el=document.getElementById('sp-'+a.id);
         if(el&&el.dataset.m!=='1'){el.dataset.m='1';
