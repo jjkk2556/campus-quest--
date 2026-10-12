@@ -147,7 +147,7 @@ header{position:sticky;top:0;z-index:100;background:var(--panel);border-bottom:v
 .hud-item b{color:var(--gold);}
 .lvbar{width:80px;height:10px;background:rgba(0,0,0,.3);border-radius:var(--radius);overflow:hidden;}
 .lvbar i{display:block;height:100%;background:linear-gradient(90deg,var(--neon),var(--cyan));}
-.themes{display:flex;gap:6px;}
+select.tbtn{cursor:pointer;font-family:inherit;color:var(--cardInk);background:var(--panel2);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);outline:none;}
 .tbtn{cursor:pointer;font-family:inherit;font-size:11px;border:var(--cardBorder);border-radius:var(--radius);
   background:var(--panel2);color:var(--cardInk);padding:6px 10px;box-shadow:var(--shadow);}
 .tbtn.active{background:var(--gold);color:#1a1a1a;font-weight:bold;}
@@ -164,7 +164,42 @@ header{position:sticky;top:0;z-index:100;background:var(--panel);border-bottom:v
 .btn.pink{background:var(--pink);color:#fff;}
 .btn.ghost{background:var(--panel2);color:var(--cardInk);}
 .main{max-width:1200px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 300px;gap:24px;}
+.chat-box{display:flex;flex-direction:column;gap:8px;max-height:44vh;overflow-y:auto;padding:4px 2px 10px;margin-bottom:10px;-webkit-overflow-scrolling:touch;}
+.chat-msg{font-size:12px;line-height:1.7;padding:8px 10px;background:var(--panel2);border:var(--cardBorder);border-radius:var(--radius);color:var(--cardInk);word-break:break-all;}
+.chat-msg .who{color:var(--cyan);font-weight:bold;}
+.chat-msg.mine .who{color:var(--gold);}
+.chat-msg .tm{color:var(--dim);font-size:10px;float:right;margin-left:8px;}
+.chat-input{display:flex;gap:8px;}
+.chat-input input{flex:1;background:rgba(0,0,0,.25);border:var(--cardBorder);border-radius:var(--radius);color:var(--ink);font-family:inherit;font-size:13px;padding:10px;outline:none;}
+body[data-theme="modern"] .chat-input input{background:#fff;color:#1c1e26;}
+.comm-item{display:flex;align-items:center;gap:10px;padding:10px;border:var(--cardBorder);border-radius:var(--radius);background:var(--panel2);margin-bottom:8px;font-size:12px;color:var(--cardInk);flex-wrap:wrap;}
+.comm-item .cn{flex:1;min-width:110px;font-weight:bold;}
+.comm-item .cm{color:var(--dim);font-size:11px;}
+.cert-banner{font-size:11px;color:var(--dim);padding:8px 10px;border:2px dashed rgba(128,128,128,.4);border-radius:var(--radius);margin-bottom:12px;line-height:1.8;}
 @media(max-width:900px){.main{grid-template-columns:1fr;}}
+@media(max-width:640px){
+  .nav{gap:8px;padding:10px 12px;}
+  .logo{font-size:13px;letter-spacing:1px;}
+  .hud{gap:6px;}
+  .hud-item{padding:5px 8px;font-size:10px;}
+  .tbtn{padding:5px 7px;font-size:10px;}
+  .lvbar{width:48px;height:8px;}
+  .hero{padding:40px 14px 22px;}
+  .hero h1{letter-spacing:0;}
+  .hero p{letter-spacing:2px;font-size:12px;}
+  .btn{padding:10px 16px;font-size:12px;margin-top:20px;}
+  .main,.mine-wrap{padding-left:12px;padding-right:12px;gap:14px;}
+  .panel{padding:14px;}
+  .modal-mask{padding:12px;}
+  .modal{padding:16px;}
+  .shop-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .shop-card{padding:10px;}
+  .shop-card .ic{font-size:26px;}
+  .slot-grid{gap:8px;}
+  .quest{padding:12px;gap:10px;}
+  .reward{font-size:15px;}
+  .mx{top:6px;right:6px;}
+}
 .panel{background:var(--panel);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
 .panel h2{font-family:var(--fontTitle);font-size:15px;color:var(--cyan);margin-bottom:16px;}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
@@ -199,10 +234,14 @@ details summary{cursor:pointer;color:var(--cyan);}
 .rank-row.top2 .rank-no{background:#cfd4dc;color:#1a1a1a;}
 .rank-row.top3 .rank-no{background:#cd7f32;color:#1a1a1a;}
 .rank-name{flex:1;}.rank-pt{color:var(--cyan);}
-.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
 .modal-mask.show{display:flex;}
 .modal{background:var(--panel);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);
-  width:100%;max-width:520px;padding:24px;animation:pop .15s steps(3);}
+  width:100%;max-width:520px;padding:24px;animation:pop .15s steps(3);position:relative;
+  margin-top:auto;margin-bottom:auto;max-height:calc(100vh - 40px);overflow-y:auto;}
+.mx{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer;font-family:inherit;padding:4px 8px;z-index:5;}
+.mx:hover{color:var(--pink);}
 @keyframes pop{from{transform:scale(.92)}to{transform:scale(1)}}
 .modal h3{font-family:var(--fontTitle);font-size:14px;color:var(--gold);margin-bottom:18px;}
 .field{margin-bottom:14px;}
@@ -221,6 +260,23 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 .proof-tools.show{display:flex;}
 .pbtn{cursor:pointer;font-family:inherit;font-size:11px;border:var(--cardBorder);border-radius:var(--radius);background:var(--panel2);color:var(--cardInk);padding:6px 12px;box-shadow:var(--shadow);}
 .pbtn:active{transform:translateY(2px);box-shadow:none;}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.shop-card{background:var(--panel2);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;color:var(--cardInk);display:flex;flex-direction:column;}
+.shop-card .ic{font-size:34px;margin-bottom:8px;}
+.shop-card .nm{font-size:13px;font-weight:bold;margin-bottom:4px;}
+.shop-card .ds{font-size:11px;color:var(--cardDim);min-height:32px;margin-bottom:8px;line-height:1.6;}
+.shop-card .pr{color:var(--gold);font-weight:bold;font-size:14px;margin-bottom:8px;}
+.shop-card .pr small{color:var(--cardDim);font-weight:normal;}
+.shop-card .seller{font-size:10px;color:var(--cardDim);margin-bottom:8px;}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:430px;margin:0 auto;}
+.slot{aspect-ratio:1;background:var(--panel2);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--cardInk);cursor:pointer;position:relative;text-align:center;overflow:hidden;}
+.slot.empty{color:var(--dim);}
+.slot .sic{font-size:26px;}
+.slot .snm{font-weight:bold;font-size:12px;}
+.slot .spr{color:var(--gold);font-weight:bold;}
+.slot .qty{position:absolute;top:4px;right:6px;color:var(--gold);font-weight:bold;font-size:12px;}
+.slot .cool{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;color:#ffb3b3;font-size:11px;line-height:1.6;padding:6px;}
+.slot .mini{margin-top:2px;font-size:10px;padding:2px 8px;background:rgba(0,0,0,.15);border:none;color:var(--cardInk);cursor:pointer;font-family:inherit;border-radius:var(--radius);}
 .mine-wrap{max-width:1200px;margin:0 auto;padding:0 20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 @media(max-width:900px){.mine-wrap{grid-template-columns:1fr;}}
 .mine-wrap .panel h2{font-size:13px;}
@@ -237,11 +293,14 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
   <div class="nav">
     <div class="logo" onclick="scrollTo({top:0,behavior:'smooth'})"><span class="coin"></span>CAMPUS QUEST</div>
     <div class="hud">
-      <div class="themes">
-        <button class="tbtn active" data-t="retro" onclick="setTheme('retro')">🕹️ 街机</button>
-        <button class="tbtn" data-t="western" onclick="setTheme('western')">🤠 西部</button>
-        <button class="tbtn" data-t="modern" onclick="setTheme('modern')">🌿 简约</button>
-      </div>
+      <button class="tbtn" onclick="openComm()">💬 社区</button>
+      <button class="tbtn" onclick="openBag()">🎒 背包</button>
+      <button class="tbtn" onclick="openShop()">🛒 商店</button>
+      <select id="themeSel" class="tbtn" onchange="setTheme(this.value)" title="界面主题">
+        <option value="retro">🕹️ 街机</option>
+        <option value="western">🤠 悬赏令</option>
+        <option value="modern">🌿 简约</option>
+      </select>
       <div class="hud-item">LV.<b id="lv">1</b><div class="lvbar"><i id="expbar" style="width:0%"></i></div></div>
       <div class="hud-item">金币 <b id="coins">--</b></div>
       <div class="hud-item">信誉 <b id="rep">--</b></div>
@@ -278,6 +337,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 <!-- 登录/注册 -->
 <div class="modal-mask" id="authMask">
   <div class="modal" style="max-width:400px;">
+    <button class="mx" onclick="closeAuth()">✕</button>
     <h3>▶ 玩家登入</h3>
     <div class="auth-tabs">
       <button class="tab active" id="tabLogin" onclick="authMode='login';renderAuthTabs()">登录</button>
@@ -302,6 +362,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 <!-- 发布悬赏 -->
 <div class="modal-mask" id="pubMask">
   <div class="modal">
+    <button class="mx" onclick="closePublish()">✕</button>
     <h3>▶ 发布新悬赏</h3>
     <div class="field"><label>任务标题</label><input id="qTitle" maxlength="30" placeholder="例：帮忙带一份二食堂麻辣烫"></div>
     <div class="field"><label>任务分类</label>
@@ -345,6 +406,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 <!-- 交付凭证 -->
 <div class="modal-mask" id="proofMask">
   <div class="modal">
+    <button class="mx" onclick="closeProof()">✕</button>
     <h3>▶ 提交交付凭证</h3>
     <div class="field"><label>交付说明</label><textarea id="proofText" rows="3" placeholder="文字说明 / 取件码 / 链接……"></textarea></div>
     <div class="field"><label>图片凭证（可选，自动压缩）</label><input id="proofImg" type="file" accept="image/*" onchange="previewProofImg(this)"></div>
@@ -357,6 +419,77 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
       <button class="btn ghost" style="margin-top:0" onclick="closeProof()">取消</button>
       <button class="btn" style="margin-top:0" onclick="doSubmitProof()">提交凭证</button>
     </div>
+  </div>
+</div>
+
+<!-- 商店 -->
+<div class="modal-mask" id="shopMask">
+  <div class="modal" style="max-width:880px">
+    <button class="mx" onclick="closeShop()">✕</button>
+    <h3>▶ 赏金商店</h3>
+    <div class="tabs">
+      <button class="tab" id="shopTab1" onclick="shopTab='official';renderShopTabs()">🏛️ 官方商店</button>
+      <button class="tab" id="shopTab2" onclick="shopTab='mine';renderShopTabs()">🪟 我的橱窗</button>
+    </div>
+    <div id="shopBody"></div>
+  </div>
+</div>
+
+<!-- 上架商品 -->
+<div class="modal-mask" id="listMask">
+  <div class="modal" style="max-width:420px">
+    <button class="mx" onclick="closeList()">✕</button>
+    <h3>▶ 上架商品 · 窗口 <span id="listSlotNo"></span></h3>
+    <div class="field"><label>商品名（1-20 字）</label><input id="lName" maxlength="20" placeholder="例：二手台灯"></div>
+    <div class="field"><label>图标（emoji）</label><input id="lIcon" maxlength="4" value="📦"></div>
+    <div class="field"><label>单价（金币）</label><input id="lPrice" type="number" min="1" max="100000" value="10"></div>
+    <div class="field"><label>数量（1 - 10 件）</label><input id="lQty" type="number" min="1" max="10" value="1"></div>
+    <div class="field"><label>文字详情（可选）</label><textarea id="lDesc" rows="2" maxlength="200" placeholder="成色 / 交易方式……"></textarea></div>
+    <div class="field"><label>图片（可选，自动压缩）</label><input id="lImg" type="file" accept="image/*" onchange="previewListImg(this)"></div>
+    <img id="listImgPreview" style="display:none;max-width:100%;border:3px solid rgba(0,0,0,.3);border-radius:var(--radius);">
+    <div class="proof-tools" id="listImgTools">
+      <button class="pbtn" onclick="rotateListImg()">↻ 旋转 90°</button>
+      <button class="pbtn" onclick="removeListImg()">✕ 移除图片</button>
+    </div>
+    <div class="field"><label>视频（可选，≤10MB）</label><input id="lVid" type="file" accept="video/*" onchange="previewListVid(this)"></div>
+    <video id="listVidPreview" controls style="display:none;max-width:100%;border-radius:var(--radius);margin-bottom:10px;background:#000;"></video>
+    <div class="proof-tools" id="listVidTools"><button class="pbtn" onclick="removeListVid()">✕ 移除视频</button></div>
+    <div class="actions">
+      <button class="btn ghost" style="margin-top:0" onclick="closeList()">取消</button>
+      <button class="btn" style="margin-top:0" onclick="doList()">确认上架</button>
+    </div>
+  </div>
+</div>
+
+<!-- 背包 -->
+<div class="modal-mask" id="bagMask">
+  <div class="modal" style="max-width:440px">
+    <button class="mx" onclick="closeBag()">✕</button>
+    <h3>▶ 我的背包</h3>
+    <div id="bagBody"></div>
+  </div>
+</div>
+
+<!-- 社区 -->
+<div class="modal-mask" id="commMask">
+  <div class="modal" style="max-width:720px">
+    <button class="mx" onclick="closeComm()">✕</button>
+    <h3>▶ 猎人社区</h3>
+    <div class="tabs">
+      <button class="tab" id="ct1" onclick="commTab='world';commView=null;renderCommTabs()">🌍 大世界社区</button>
+      <button class="tab" id="ct2" onclick="commTab='school';commView=null;renderCommTabs()">🏫 本校社区</button>
+      <button class="tab" id="ct3" onclick="commTab='joined';commView=null;renderCommTabs()">⛺ 我加入的社区</button>
+    </div>
+    <div id="commBody"></div>
+  </div>
+</div>
+
+<!-- 商品详情 -->
+<div class="modal-mask" id="itemMask">
+  <div class="modal" style="max-width:480px">
+    <button class="mx" onclick="closeItem()">✕</button>
+    <h3>▶ 商品详情</h3>
+    <div id="itemBody"></div>
   </div>
 </div>
 
@@ -388,7 +521,7 @@ const THEME_TXT={
 function setTheme(t){
   document.body.dataset.theme=t;
   localStorage.setItem('cq_theme',t);
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  const sel=document.getElementById('themeSel');if(sel)sel.value=t;
   const x=THEME_TXT[t];
   document.getElementById('heroTitle').innerHTML=x.title;
   document.getElementById('heroSub').textContent=x.sub;
@@ -441,8 +574,20 @@ let demo={
     {id:5,title:'求带羽毛球拍穿线',cat:'其他',reward:25,diff:1,time:'本周内',place:'器材室',desc:'周六比赛急用。',status:'submitted',publisher:'路过的勇者',acceptor:'快递侠',proof:{text:'已穿好，拍子放器材室架子上。',img:null},scope:'camp',school:'东山校区'},
     {id:6,title:'【跨区】收一本《操作系统》教材',cat:'悬赏',reward:40,diff:1,time:'下周三前',place:'任意校区门口',desc:'版本不限，能看就行。',status:'open',publisher:'高数之神',acceptor:null,proof:null,scope:'world',school:null},
   ],
+  shopOfficial:[
+    {id:1,name:'悬赏加急券',icon:'⚡',desc:'为你的悬赏加上闪电标识，吸引更多猎人。',price:30,stock:999},
+    {id:2,name:'改名卡',icon:'✏️',desc:'修改你的猎人代号（联系站长执行）。',price:100,stock:999},
+    {id:3,name:'双倍金币卡',icon:'🍀',desc:'24 小时内完成的任务奖励翻倍。',price:60,stock:999},
+    {id:4,name:'神秘盲盒',icon:'🎁',desc:'随机开出 10~99 金币，非酋慎入。',price:30,stock:999}],
+  myListings:[],
+  cert:true,
+  communities:[{id:1,name:'深夜食堂研究会',creator:'官方',members:['路过的勇者','快递侠']},
+               {id:2,name:'考研互助会',creator:'高数之神',members:['高数之神']}],
+  chatWorld:[{user:'快递侠',school:'东山校区',text:'欢迎来到大世界社区，文明交流～',ts:Date.now()-3600e3},
+             {user:'高数之神',school:'西山校区',text:'今晚八点答疑，图书馆见。',ts:Date.now()-1800e3}],
+  chatSchool:[{user:'快递侠',school:'东山校区',text:'东山校区的朋友在哪里？',ts:Date.now()-900e3}],
   ranks:[{name:'高数之神',pt:3050},{name:'快递侠',pt:2180},{name:'占座大师',pt:990},{name:'图书馆幽灵',pt:640},{name:'路过的勇者',pt:100}],
-  me:{username:'路过的勇者',coins:320,rep:3,school:'东山校区'}
+  me:{username:'路过的勇者',coins:320,rep:3,school:'东山校区',inventory:[{id:3,name:'双倍金币卡',icon:'🍀',ts:Date.now()-86400e3}],boost:0}
 };
 let quests=[],ranks=[];
 
@@ -699,10 +844,463 @@ async function confirmQuest(id){
       patchQuest(r.quest);me=r.user;
     }else{
       const q=demo.quests.find(x=>x.id===id);q.status='done';
-      if(q.acceptor===demo.me.username){demo.me.coins+=q.reward;demo.me.rep+=2;}
+      if(q.acceptor===demo.me.username){const mult=(demo.me.boost>Date.now())?2:1;demo.me.coins+=q.reward*mult;demo.me.rep+=2;}
     }
     beep(660);setTimeout(()=>beep(990),80);setTimeout(()=>beep(1320),160);
     toast('✔ 结算完成，金币已到账！');renderAll();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+
+/* ================= 商店 ================= */
+let shopTab='official',shopOfficial=[],mySlots=[],_listSlot=null;
+function openShop(){
+  if(online&&!me){toast('请先登录再进入商店');openAuth();return;}
+  $('shopMask').classList.add('show');loadShop();renderShopTabs();
+}
+function closeShop(){$('shopMask').classList.remove('show');}
+async function loadShop(){
+  if(online){
+    try{
+      const [o,ms]=await Promise.all([api('/api/shop/official'),api('/api/myshop')]);
+      shopOfficial=o.items;mySlots=ms.slots;
+    }catch(e){toast('✘ '+e.message);}
+  }
+  renderShopBody();
+}
+function renderShopTabs(){
+  $('shopTab1').classList.toggle('active',shopTab==='official');
+  $('shopTab2').classList.toggle('active',shopTab==='mine');
+  renderShopBody();
+}
+function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function renderShopBody(){
+  const u=myInfo();
+  if(shopTab==='official'){
+    const items=online?shopOfficial:demo.shopOfficial;
+    $('shopBody').innerHTML='<div class="shop-grid">'+items.map(it=>
+      '<div class="shop-card"><div class="ic">'+it.icon+'</div><div class="nm">'+esc(it.name)+'</div>'+
+      '<div class="ds">'+esc(it.desc)+'</div>'+
+      '<div class="pr">🪙 '+it.price+' <small>库存 '+it.stock+'</small></div>'+
+      '<button class="accept-btn" onclick="buyOfficial('+it.id+')">购买</button></div>').join('')+'</div>';
+  }else{
+    let slots;
+    if(online){slots=mySlots;}
+    else{
+      slots=[];
+      for(let i=0;i<9;i++){
+        const l=demo.myListings.find(x=>x.slot===i);
+        if(l&&l.qty>0)slots.push({slot:i,listing:{name:l.name,icon:l.icon,desc:l.desc,price:l.price,qty:l.qty,img:l.img||null,vid:l.vid||null},cooldownUntil:0});
+        else if(l&&l.soldOutAt){
+          const cu=l.soldOutAt+7*24*3600*1000;
+          slots.push({slot:i,listing:null,cooldownUntil:cu>Date.now()?cu:0});
+        }else slots.push({slot:i,listing:null,cooldownUntil:0});
+      }
+    }
+    $('shopBody').innerHTML=
+      '<div style="text-align:center;font-size:11px;color:var(--dim);margin-bottom:12px">单个窗口最多 10 件 · 售罄后该窗口冷却 7 天</div>'+
+      '<div class="slot-grid">'+slots.map(sl=>{
+        if(sl.listing){
+          const L=sl.listing;
+          return '<div class="slot" onclick="openItemDetail('+sl.slot+')"><span class="qty">×'+L.qty+'</span><span class="sic">'+L.icon+'</span>'+
+            '<span class="snm">'+esc(L.name)+'</span><span class="spr">🪙 '+L.price+'</span>'+
+            '<button class="mini" onclick="unlistItem('+sl.slot+',event)">下架</button></div>';
+        }
+        if(sl.cooldownUntil>0){
+          const d=Math.ceil((sl.cooldownUntil-Date.now())/86400000);
+          return '<div class="slot"><span class="cool">⏳ 冷却中<br>剩余 '+d+' 天</span></div>';
+        }
+        return '<div class="slot empty" onclick="openList('+sl.slot+')"><span class="sic">＋</span><span>上架商品</span></div>';
+      }).join('')+'</div>';
+  }
+}
+async function buyOfficial(id){
+  try{
+    if(online){
+      const r=await api('/api/shop/buy',{method:'POST',body:JSON.stringify({id:id})});
+      me=r.user;toast('✔ '+r.msg);
+    }else{
+      const it=demo.shopOfficial.find(x=>x.id===id);
+      if(!it||it.stock<=0)return toast('✘ 已售罄');
+      if(demo.me.coins<it.price)return toast('✘ 金币不足');
+      demo.me.coins-=it.price;it.stock--;
+      if(id===4){const roll=10+Math.floor(Math.random()*90);demo.me.coins+=roll;toast('🎁 盲盒开出 🪙'+roll+'！');}
+      else{
+        if(id===5){demo.cert=true;toast('📜 赏金猎人之证已生效，现在可以创建社区了！');}
+        else{demo.me.inventory.push({id:it.id,name:it.name,icon:it.icon,ts:Date.now()});toast('✔ '+it.name+' 已放入背包');}
+      }
+    }
+    beep(880);renderHUD();loadShop();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+let _listImg=null,_listVid=null;
+function previewListImg(input){
+  const f=input.files&&input.files[0];
+  if(!f){return;}
+  compressImage(f).then(d=>{_listImg=d;$('listImgPreview').src=d;$('listImgPreview').style.display='block';$('listImgTools').classList.add('show');})
+    .catch(()=>toast('✘ 图片读取失败'));
+}
+async function rotateListImg(){
+  if(!_listImg)return;
+  try{_listImg=await rotateDataURL(_listImg);$('listImgPreview').src=_listImg;beep(700,.05);}catch(e){toast('✘ 旋转失败');}
+}
+function removeListImg(){_listImg=null;$('lImg').value='';$('listImgPreview').style.display='none';$('listImgTools').classList.remove('show');}
+function previewListVid(input){
+  const f=input.files&&input.files[0];
+  if(!f)return;
+  if(f.size>10*1024*1024){toast('✘ 视频请限制在 10MB 以内');input.value='';return;}
+  const r=new FileReader();
+  r.onload=e=>{_listVid=e.target.result;$('listVidPreview').src=_listVid;$('listVidPreview').style.display='block';$('listVidTools').classList.add('show');};
+  r.onerror=()=>toast('✘ 视频读取失败');
+  r.readAsDataURL(f);
+}
+function removeListVid(){_listVid=null;$('lVid').value='';$('listVidPreview').style.display='none';$('listVidTools').classList.remove('show');}
+function findSlotListing(slot){
+  if(online){const sl=mySlots.find(x=>x.slot===slot);return sl?sl.listing:null;}
+  const l=demo.myListings.find(x=>x.slot===slot&&x.qty>0);
+  return l?{name:l.name,icon:l.icon,desc:l.desc,price:l.price,qty:l.qty,img:l.img||null,vid:l.vid||null}:null;
+}
+function openItemDetail(slot){
+  const L=findSlotListing(slot);
+  if(!L)return;
+  $('itemBody').innerHTML=
+    '<div style="text-align:center;margin-bottom:12px"><span style="font-size:40px">'+L.icon+'</span>'+
+    '<div style="font-weight:bold;font-size:15px;margin-top:6px">'+esc(L.name)+'</div>'+
+    '<div style="color:var(--gold);font-weight:bold;margin-top:4px">🪙 '+L.price+' <small style="color:var(--dim)">× '+L.qty+' 件</small></div></div>'+
+    (L.desc?'<div style="font-size:12px;color:var(--dim);line-height:1.8;margin-bottom:10px">'+esc(L.desc)+'</div>':'')+
+    (L.img?'<img src="'+L.img+'" onclick="openLightbox(this.src)" style="max-width:100%;cursor:zoom-in;border:3px solid rgba(0,0,0,.3);border-radius:var(--radius);display:block;margin-bottom:10px">':'')+
+    (L.vid?'<video src="'+L.vid+'" controls style="max-width:100%;border-radius:var(--radius);background:#000;display:block"></video>':'')+
+    ((!L.desc&&!L.img&&!L.vid)?'<div class="mempty">卖家没有留下详情</div>':'');
+  $('itemMask').classList.add('show');
+}
+function closeItem(){$('itemMask').classList.remove('show');}
+function openList(slot){_listSlot=slot;_listImg=null;_listVid=null;
+  $('lImg').value='';$('lVid').value='';$('listImgPreview').style.display='none';$('listImgTools').classList.remove('show');
+  $('listVidPreview').style.display='none';$('listVidTools').classList.remove('show');$('listSlotNo').textContent='#'+(slot+1);$('lName').value='';$('lDesc').value='';$('lIcon').value='📦';$('lPrice').value=10;$('lQty').value=1;$('listMask').classList.add('show');}
+function closeList(){$('listMask').classList.remove('show');}
+async function doList(){
+  const d={slot:_listSlot,name:$('lName').value,icon:$('lIcon').value,price:$('lPrice').value,qty:$('lQty').value,desc:$('lDesc').value,img:_listImg,vid:_listVid};
+  try{
+    if(online){await api('/api/myshop/list',{method:'POST',body:JSON.stringify(d)});}
+    else{
+      const qty=parseInt(d.qty);
+      if(!d.name.trim())throw new Error('请填写商品名');
+      if(!(qty>=1&&qty<=10))throw new Error('单个商品数量不能超过 10 件');
+      demo.myListings.push({slot:_listSlot,name:d.name.trim(),icon:(d.icon||'📦').slice(0,4),desc:(d.desc||'').trim(),img:d.img||null,vid:d.vid||null,price:parseInt(d.price)||10,qty:qty,soldOutAt:null});
+    }
+    beep(660);toast('✔ 已上架窗口 #'+(d.slot+1));closeList();loadShop();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+async function unlistItem(slot,e){
+  if(e)e.stopPropagation();
+  if(!confirm('确定下架该窗口的商品？（不会触发冷却）'))return;
+  try{
+    if(online){await api('/api/myshop/unlist',{method:'POST',body:JSON.stringify({slot:slot})});}
+    else{const i=demo.myListings.findIndex(x=>x.slot===slot&&x.qty>0);if(i>-1)demo.myListings.splice(i,1);}
+    beep(440,.08);toast('↩ 已下架');loadShop();
+  }catch(e2){toast('✘ '+e2.message);beep(220,.15);}
+}
+
+/* ================= 背包 ================= */
+function fmtDay(ts){const d=new Date(ts);return (d.getMonth()+1)+'月'+d.getDate()+'日 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function openBag(){
+  if(online&&!me){toast('请先登录再查看背包');openAuth();return;}
+  const u=myInfo();
+  const inv=(u.inventory||[]);
+  let html='';
+  if(u.cert)html+='<div class="cert-banner" style="margin-bottom:12px">📜 你已持有 <b style="color:var(--gold)">赏金猎人之证</b>，可随时创建小社区。</div>';
+  html+=inv.length?inv.slice().reverse().map(it=>
+    '<div class="comm-item"><span style="font-size:22px">'+it.icon+'</span>'+
+    '<span class="cn">'+esc(it.name)+'</span>'+
+    '<span class="cm">'+fmtDay(it.ts)+' 购入</span>'+
+    (it.id?'<button class="accept-btn" onclick="useItem('+it.id+')">使用</button>':'')+'</div>').join('')
+    :'<div class="mempty">背包空空如也<br><button class="btn" style="margin-top:14px" onclick="closeBag();openShop()">去商店逛逛</button></div>';
+  $('bagBody').innerHTML=html;
+  $('bagMask').classList.add('show');
+}
+async function useItem(id){
+  try{
+    if(online){
+      let body={id:id};
+      if(id===2){const nn=prompt('输入你的新代号（2-16 位中英文/数字/下划线）：');if(!nn)return;body.newName=nn;}
+      const r=await api('/api/item/use',{method:'POST',body:JSON.stringify(body)});
+      me=r.user;toast(r.msg);
+    }else{
+      const i=demo.me.inventory.findIndex(x=>x.id===id);
+      if(i<0)return toast('✘ 背包中没有该道具');
+      if(id===1){demo.me.rep+=1;toast('⚡ 加急券已使用，信誉 +1！');}
+      else if(id===3){demo.me.boost=Date.now()+24*3600*1000;toast('🍀 双倍金币卡生效：24 小时内任务奖励翻倍！');}
+      else if(id===2){
+        const nn=prompt('输入你的新代号（2-16 位中英文/数字/下划线）：');if(!nn)return;
+        if(!/^[\u4e00-\u9fa5A-Za-z0-9_]{2,16}$/.test(nn))return toast('✘ 代号格式不对');
+        const oldn=demo.me.username;demo.me.username=nn;
+        demo.quests.forEach(q=>{if(q.publisher===oldn)q.publisher=nn;if(q.acceptor===oldn)q.acceptor=nn;});
+        toast('✏️ 改名成功，你现在叫 '+nn+'！');
+      }
+      else return toast('✘ 该道具无法使用');
+      demo.me.inventory.splice(i,1);
+    }
+    beep(880);renderHUD();renderAll();openBag();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+function closeBag(){$('bagMask').classList.remove('show');}
+
+/* ================= AI 工坊（社区小应用） ================= */
+const LOCAL_FORTUNES=[
+  {lv:'大吉',text:'鸿运当头，宜接大悬赏，忌翘课'},
+  {lv:'中吉',text:'有小财进账，去商店抽个盲盒吧'},
+  {lv:'小吉',text:'灵感迸发，写代码一把过'},
+  {lv:'平',text:'普通的一天，但食堂有新菜'},
+  {lv:'小凶',text:'易迟到，定三个闹钟'}];
+function genAppLocal(p){
+  const t=(p||'').trim();
+  if(/投票|票选|表决/.test(t)){
+    let title=t,options=[];
+    const om=t.match(/选项[:：](.+)$/);
+    if(om){options=om[1].split(/[、,，\/\s]+/).filter(Boolean).slice(0,8);title=t.slice(0,om.index);}
+    title=title.replace(/^(帮我|我要|我想|我想要|请|创建|生成|做一个|做个|做|来一个|来|一个)+/,'')
+      .replace(/投票|票选|表决/g,'').replace(/[:：，,。\s]+$/,'').replace(/^[:：，,。\s]+/,'').trim();
+    if(!options.length){
+      const rest=title.split(/\s+/);
+      if(rest.length>1){title=rest[0];options=rest.slice(1,9);}
+      else options=['支持','反对'];
+    }
+    if(!title)title='社区投票';
+    return {type:'vote',title:title.slice(0,20),options:options.map(o=>o.slice(0,12))};
+  }
+  if(/抽签|运势|求签|占卜|运气/.test(t)){
+    let title=t.replace(/^(帮我|我要|我想|请|创建|生成|做一个|做个|做|来一个|来|一个)+/,'')
+      .replace(/抽签|运势|求签|占卜|看/g,'').replace(/[:：，,。\s]+$/,'').replace(/^[:：，,。\s]+/,'').trim().slice(0,20);
+    return {type:'fortune',title:title||'今日运势'};
+  }
+  return null;
+}
+function demoApps(){
+  const com=demo.communities.find(x=>String(x.id)===String(commView));
+  if(!com||!(com.apps||[]).length)return [];
+  const un=demo.me.username;
+  return com.apps.map(a=>{
+    if(a.spec.code)return {id:a.id,type:a.spec.type||'tool',title:a.spec.title,code:a.spec.code,engine:'local',creator:a.creator};
+    if(a.spec.type==='vote'){
+      const votes=Object.values(a.votes);
+      const tally=a.spec.options.map((_,i)=>votes.filter(c=>c===i).length);
+      return {id:a.id,type:'vote',title:a.spec.title,options:a.spec.options,tally:tally,
+        total:votes.length,myVote:a.votes[un]!==undefined?a.votes[un]:-1,creator:a.creator};
+    }
+    const d=a.draws[un];
+    const today=d&&new Date(d.ts).toDateString()===new Date().toDateString();
+    return {id:a.id,type:'fortune',title:a.spec.title,myDraw:today?d.result:null,creator:a.creator};
+  });
+}
+function openCommTool(){commTool=true;loadComm();}
+function toolPanelHTML(){
+  return '<button class="pbtn" style="margin-bottom:10px" onclick="commTool=false;loadComm()">◀ 返回聊天</button>'+
+  '<div class="cert-banner">🤖 <b>AI 工坊</b>：一句话生成社区小应用，仅本社区成员可用。例如：<br>'+
+  '· "一个宿舍卫生值日表生成器"<br>· "帮我做个课堂随机点名的转盘"<br>· "投票：团建去哪，选项：爬山、烧烤"</div>'+
+  '<div class="chat-input" style="margin-bottom:8px"><input id="aiIn" maxlength="100" placeholder="描述你想要的小应用…" '+
+  'onkeydown="if(event.key===\'Enter\')doGenApp()"><button class="accept-btn" onclick="doGenApp()">生成</button></div>'+
+  '<div id="aiLog" style="font-size:11px;color:var(--dim);min-height:18px;margin-bottom:10px"></div>'+
+  '<div id="appCards"></div>';
+}
+async function doGenApp(){
+  const inp=$('aiIn');const prompt=inp.value.trim();
+  if(!prompt)return;
+  const log=$('aiLog');
+  for(const st of ['🤖 理解需求…','🧩 匹配模板…','🎨 生成界面…']){
+    log.textContent=st;await new Promise(r=>setTimeout(r,350));
+  }
+  try{
+    if(online){await api('/api/communities/'+commView+'/apps',{method:'POST',body:JSON.stringify({prompt:prompt})});}
+    else{
+      throw new Error('离线试玩暂不支持 AI 工坊，请在页脚「⚙ 服务器设置」连接服务器后使用');
+    }
+    log.textContent='✔ 生成完毕！';
+    inp.value='';
+    beep(880);setTimeout(()=>loadComm(),400);
+  }catch(e){log.textContent='';toast('✘ '+e.message);beep(220,.15);}
+}
+let _cardsSig=null,_spRetry=0;
+function renderAppCards(){
+  const el=$('appCards');if(!el)return;
+  const sig=JSON.stringify(commApps.map(a=>[a.id,a.type||'',a.myVote||-1,a.total||0,a.myDraw?1:0,a.code?1:0]));
+  if(sig===_cardsSig)return;
+  _cardsSig=sig;
+  if(window.__unmountAllSandpacks)window.__unmountAllSandpacks();
+  el.innerHTML=commApps.length
+    ?'<div class="shop-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">'+commApps.slice().reverse().map(appCard).join('')+'</div>'
+    :'<div class="mempty">还没有小应用，用 AI 工坊创建一个吧</div>';
+  mountSandboxes();
+}
+function mountSandboxes(){
+  const todo=commApps.filter(a=>a.code&&document.getElementById('sp-'+a.id));
+  if(!todo.length)return;
+  if(!window.__mountSandpack){if(_spRetry++<15){setTimeout(mountSandboxes,800);}return;}
+  _spRetry=0;
+  todo.forEach(a=>window.__mountSandpack(a.id,a.code));
+}
+async function voteApp(id,choice){
+  try{
+    if(online){await api('/api/apps/'+id+'/vote',{method:'POST',body:JSON.stringify({choice:choice})});}
+    else{
+      const com=demo.communities.find(x=>String(x.id)===String(commView));
+      const a=(com.apps||[]).find(x=>x.id===id);
+      a.votes[demo.me.username]=choice;
+    }
+    beep(700,.05);loadComm();
+  }catch(e){toast('✘ '+e.message);beep(220,.1);}
+}
+async function drawApp(id){
+  if(drawingId)return;
+  drawingId=id;renderAppCards();
+  try{
+    await new Promise(r=>setTimeout(r,700));
+    if(online){await api('/api/apps/'+id+'/draw',{method:'POST',body:'{}'});}
+    else{
+      const com=demo.communities.find(x=>String(x.id)===String(commView));
+      const a=(com.apps||[]).find(x=>x.id===id);
+      const un=demo.me.username;
+      const old=a.draws[un];
+      if(!(old&&new Date(old.ts).toDateString()===new Date().toDateString()))
+        a.draws[un]={result:LOCAL_FORTUNES[Math.floor(Math.random()*LOCAL_FORTUNES.length)],ts:Date.now()};
+    }
+    beep(1320,.1);
+  }catch(e){toast('✘ '+e.message);}
+  drawingId=null;loadComm();
+}
+
+/* ================= 社区 ================= */
+let commTab='world',commView=null,commTimer=null,communities=[],cert=false,chatMsgs=[],_commKey=null,commTool=false,commApps=[],drawingId=null;
+function openComm(){
+  if(online&&!me){toast('请先登录再进入社区');openAuth();return;}
+  $('commMask').classList.add('show');commView=null;renderCommTabs();startCommPoll();
+}
+function closeComm(){$('commMask').classList.remove('show');stopCommPoll();}
+function startCommPoll(){stopCommPoll();commTimer=setInterval(()=>{if($('commMask').classList.contains('show'))loadComm();else stopCommPoll();},5000);}
+function stopCommPoll(){if(commTimer){clearInterval(commTimer);commTimer=null;}}
+function renderCommTabs(){
+  $('ct1').classList.toggle('active',commTab==='world');
+  $('ct2').classList.toggle('active',commTab==='school');
+  $('ct3').classList.toggle('active',commTab==='joined');
+  loadComm();
+}
+function fmtTs(ts){const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+async function loadComm(){
+  try{
+    if(commTab==='joined'&&!commView){
+      if(online){const r=await api('/api/communities');communities=r.communities;cert=r.cert;}
+      else{communities=demo.communities.map(c=>({id:c.id,name:c.name,creator:c.creator,count:c.members.length,mine:c.members.includes(demo.me.username)}));cert=demo.cert;}
+    }else if(commTab==='joined'&&commView&&commTool){
+      if(online){const r=await api('/api/communities/'+commView+'/apps');commApps=r.apps;}
+      else{commApps=demoApps();}
+    }else{
+      const c=commTab==='world'?'world':(commTab==='school'?'school':commView);
+      if(online){const r=await api('/api/chat?c='+encodeURIComponent(c));chatMsgs=r.messages;}
+      else{
+        let pool=c==='world'?demo.chatWorld:(c==='school'?demo.chatSchool:null);
+        if(!pool){const com=demo.communities.find(x=>String(x.id)===String(c));pool=com?com.chat||(com.chat=[]):[];}
+        const un=demo.me.username;
+        chatMsgs=pool.map(m=>({user:m.user,school:m.school,text:m.text,ts:m.ts,mine:m.user===un}));
+      }
+    }
+  }catch(e){toast('✘ '+e.message);}
+  renderCommBody();
+}
+function chatUI(channelKey,title,backBtn){
+  const rows=chatMsgs.map(m=>
+    '<div class="chat-msg'+(m.mine?' mine':'')+'"><span class="tm">'+fmtTs(m.ts)+'</span>'+
+    '<span class="who">'+esc(m.user)+'</span> <span style="color:var(--dim);font-size:10px">🏫'+esc(m.school||'')+'</span><br>'+esc(m.text)+'</div>').join('');
+  return (backBtn?'<button class="pbtn" style="margin-bottom:10px" onclick="commView=null;loadComm()">◀ 返回社区列表</button>':'')+
+    '<div style="font-size:11px;color:var(--dim);margin-bottom:8px">'+esc(title)+'</div>'+
+    '<div class="chat-box" id="chatBox">'+(rows||'<div class="mempty">还没有人说话，来抢沙发</div>')+'</div>'+
+    '<div class="chat-input"><input id="chatIn" maxlength="200" placeholder="说点什么……（Enter 发送）" '+
+    'onkeydown="if(event.key===\'Enter\')sendChat(\''+channelKey+'\')">'+
+    '<button class="accept-btn" onclick="sendChat(\''+channelKey+'\')">发送</button></div>';
+}
+function currentCommKey(){
+  if(commTab==='world')return 'world';
+  if(commTab==='school')return 'school';
+  if(commTab==='joined')return commView?(commTool?('ct'+commView):('c'+commView)):'joined';
+  return 'x';
+}
+function msgRow(m){
+  return '<div class="chat-msg'+(m.mine?' mine':'')+'"><span class="tm">'+fmtTs(m.ts)+'</span>'+
+    '<span class="who">'+esc(m.user)+'</span> <span style="color:var(--dim);font-size:10px">🏫'+esc(m.school||'')+'</span><br>'+esc(m.text)+'</div>';
+}
+function renderChatMsgs(){
+  const box=$('chatBox');
+  if(!box)return;
+  box.innerHTML=chatMsgs.map(msgRow).join('')||'<div class="mempty">还没有人说话，来抢沙发</div>';
+  const inp=$('chatIn');
+  if(!(inp&&document.activeElement===inp))box.scrollTop=box.scrollHeight;
+}
+function renderCommBody(){
+  const key=currentCommKey();
+  const isChat=commTab==='world'||commTab==='school'||!!commView;
+  if(isChat&&_commKey===key){
+    if($('chatBox'))renderChatMsgs();
+    else if($('appCards'))renderAppCards();
+    return;
+  }
+  _commKey=key;
+  if(commTab==='world'){
+    $('commBody').innerHTML=chatUI('world','🌍 全世界猎人公开交流，全服可见');
+  }else if(commTab==='school'){
+    const vs=viewerSchool()||'';
+    $('commBody').innerHTML=chatUI('school','🏫 '+vs+' · 仅本校区可见');
+  }else if(!commView){
+    let html='<div class="cert-banner">'+
+      (cert?'📜 你已持有 <b style="color:var(--gold)">赏金猎人之证</b>，可以创建属于自己的小社区。'
+          :'💡 在官方商店购买 <b style="color:var(--gold)">赏金猎人之证</b>（🪙80）即可创建小社区；所有玩家都可以自由加入别人的社区。')+
+      '</div>';
+    if(cert)html+='<button class="btn" style="margin:0 0 14px" onclick="createComm()">＋ 创建社区</button>';
+    html+=communities.map(c=>
+      '<div class="comm-item"><span class="cn">⛺ '+esc(c.name)+'</span>'+
+      '<span class="cm">👤'+esc(c.creator)+' · '+c.count+' 人</span>'+
+      (c.mine
+        ?'<button class="accept-btn" onclick="openCommChat('+c.id+')">进入</button>'
+        :'<button class="accept-btn" onclick="joinComm('+c.id+')">加入</button>')+
+      '</div>').join('')||'<div class="mempty">还没有社区</div>';
+    $('commBody').innerHTML=html;
+  }else if(!commTool){
+    const c=communities.find(x=>String(x.id)===String(commView));
+    $('commBody').innerHTML=chatUI(String(commView),'⛺ '+(c?esc(c.name):'')+' · 仅成员可见',true)+
+      '<div style="margin-top:10px;text-align:center"><button class="pbtn" onclick="openCommTool()">🧰 社区工具（AI 工坊）</button></div>';
+    renderChatMsgs();
+  }else{
+    $('commBody').innerHTML=toolPanelHTML();
+    renderAppCards();
+  }
+}
+function openCommChat(id){commView=id;loadComm();}
+async function joinComm(id){
+  try{
+    if(online){await api('/api/communities/join',{method:'POST',body:JSON.stringify({id:id})});}
+    else{const c=demo.communities.find(x=>x.id===id);if(c&&!c.members.includes(demo.me.username))c.members.push(demo.me.username);}
+    beep(660);toast('✔ 已加入社区');loadComm();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+async function createComm(){
+  const name=prompt('给你的社区起个名字（1-16 字）：');
+  if(!name||!name.trim())return;
+  try{
+    if(online){await api('/api/communities/create',{method:'POST',body:JSON.stringify({name:name.trim()})});}
+    else{demo.communities.push({id:Date.now(),name:name.trim(),creator:demo.me.username,members:[demo.me.username],chat:[]});}
+    beep(880);toast('✔ 社区创建成功！');loadComm();
+  }catch(e){toast('✘ '+e.message);beep(220,.15);}
+}
+async function sendChat(channelKey){
+  const inp=$('chatIn');
+  const text=inp.value.trim();
+  if(!text)return;
+  try{
+    if(online){await api('/api/chat',{method:'POST',body:JSON.stringify({c:channelKey,text:text})});}
+    else{
+      const un=demo.me.username;
+      const msg={user:un,school:demo.me.school,text:text,ts:Date.now()};
+      if(channelKey==='world')demo.chatWorld.push(msg);
+      else if(channelKey==='school')demo.chatSchool.push(msg);
+      else{const com=demo.communities.find(x=>String(x.id)===String(channelKey));if(!com||!com.members.includes(un))return;(com.chat=com.chat||[]).push(msg);}
+    }
+    inp.value='';beep(880,.06);loadComm();
   }catch(e){toast('✘ '+e.message);beep(220,.15);}
 }
 
@@ -720,10 +1318,42 @@ function toast(msg){
   void t.offsetWidth;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();closeShop();closeList();closeItem();closeComm();closeBag();}});
 (async()=>{await initNet();
 $('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))closeLightbox();});
 renderAll();})();
+</script>
+<script type="importmap">
+{"imports":{"react":"https://esm.sh/react@18.3.1","react-dom":"https://esm.sh/react-dom@18.3.1","react-dom/client":"https://esm.sh/react-dom@18.3.1/client","@codesandbox/sandpack-react":"https://esm.sh/@codesandbox/sandpack-react@2?external=react,react-dom"}}
+</script>
+<link rel="stylesheet" href="https://esm.sh/@codesandbox/sandpack-react@2/dist/index.css">
+<script type="module">
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Sandpack } from "@codesandbox/sandpack-react";
+const roots = new Map();
+window.__unmountAllSandpacks = function () {
+  roots.forEach(function (r) { try { r.unmount(); } catch (e) {} });
+  roots.clear();
+};
+window.__mountSandpack = function (id, code) {
+  const el = document.getElementById("sp-" + id);
+  if (!el) return;
+  const old = roots.get(id);
+  if (old) { try { old.unmount(); } catch (e) {} roots.delete(id); }
+  try {
+    const root = createRoot(el);
+    roots.set(id, root);
+    root.render(React.createElement(Sandpack, {
+      template: "react",
+      files: { "/App.js": { code: code, active: true } },
+      theme: "dark",
+      options: { showTabs: false, editorHeight: 260, showConsoleButton: true }
+    }));
+  } catch (e) {
+    el.innerHTML = '<div style="font-size:11px;color:#888;padding:12px">沙箱加载失败：' + (e && e.message) + '</div>';
+  }
+};
 </script>
 </body>
 </html>
