@@ -1091,13 +1091,24 @@ function demoApps(){
     return {id:a.id,type:'fortune',title:a.spec.title,myDraw:today?d.result:null,creator:a.creator};
   });
 }
-function openCommTool(){commTool=true;loadComm();}
+async function refreshAiStatus(){
+  const el=$('aiStatus');if(!el)return;
+  if(!online){el.textContent='🧪 离线试玩模式';return;}
+  try{
+    const r=await api('/api/ai-status');
+    el.innerHTML=r.configured
+      ?('🤖 Kimi 已接入 · 模型 '+esc(r.model)+(r.lastError?(' · <span style="color:var(--pink)">上次调用失败：'+esc(r.lastError)+'</span>'):' · 连接正常'))
+      :('⚠️ 后端未检测到 KIMI_API_KEY —— 添加环境变量后需<b>重新部署/重启</b>服务才生效');
+  }catch(e){el.textContent='';}
+}
+function openCommTool(){commTool=true;loadComm();refreshAiStatus();}
 function toolPanelHTML(){
   return '<button class="pbtn" style="margin-bottom:10px" onclick="commTool=false;loadComm()">◀ 返回聊天</button>'+
   '<div class="cert-banner">🤖 <b>AI 工坊</b>：一句话生成社区小应用，仅本社区成员可用。例如：<br>'+
   '· "一个宿舍卫生值日表生成器"<br>· "帮我做个课堂随机点名的转盘"<br>· "投票：团建去哪，选项：爬山、烧烤"</div>'+
   '<div class="chat-input" style="margin-bottom:8px"><input id="aiIn" maxlength="100" placeholder="描述你想要的小应用…" '+
   'onkeydown="if(event.key===\'Enter\')doGenApp()"><button class="accept-btn" onclick="doGenApp()">生成</button></div>'+
+  '<div id="aiStatus" style="font-size:11px;color:var(--dim);margin-bottom:8px"></div>'+
   '<div id="aiLog" style="font-size:11px;color:var(--dim);min-height:18px;margin-bottom:10px"></div>'+
   '<div id="appCards"></div>';
 }
@@ -1116,7 +1127,7 @@ async function doGenApp(){
     log.textContent='✔ 生成完毕！';
     inp.value='';
     beep(880);setTimeout(()=>loadComm(),400);
-  }catch(e){log.textContent='';toast('✘ '+e.message);beep(220,.15);}
+  }catch(e){log.textContent='';toast('✘ '+e.message);beep(220,.15);refreshAiStatus();}
 }
 let _cardsSig=null,_spRetry=0;
 function renderAppCards(){

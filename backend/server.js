@@ -169,6 +169,7 @@ function parseToolJson(txt) {
     return { type: String(j.type || "tool").slice(0, 20), title: title, code: code };
   } catch (e) { return null; }
 }
+let lastKimiErr = null;
 async function genByKimi(prompt) {
   if (!KIMI_KEY) return null;
   try {
@@ -186,11 +187,17 @@ async function genByKimi(prompt) {
       })
     });
     clearTimeout(timer);
-    if (!r.ok) return null;
+    if (!r.ok) {
+      lastKimiErr = 'HTTP ' + r.status;
+      try { const b = await r.json(); lastKimiErr += ' ' + JSON.stringify(b.error || b).slice(0, 120); } catch (e) {}
+      return null;
+    }
     const d = await r.json();
     const txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+    if (!parseToolJson(txt)) lastKimiErr = '模型返回无法解析';
+    else lastKimiErr = null;
     return parseToolJson(txt);
-  } catch (e) { return null; }
+  } catch (e) { lastKimiErr = String(e && e.message || e).slice(0, 120); return null; }
 }
 function genLocalApp(prompt) {
   const t = String(prompt || '');
@@ -488,7 +495,12 @@ const server=http.createServer(async(req,res)=>{
     let spec=await genByKimi(data.prompt||'');
     let engine=spec?'kimi':'local';
     if(!spec)spec=genLocalApp(data.prompt||'');
-    if(!spec)return send({error:'生成失败：接入 Kimi 后可生成任意工具；当前未配置密钥，仅内置投票/抽签/待办/计分示例'},400);
+    if(!spec){
+      const hint=KIMI_KEY
+        ?('Kimi 调用失败：'+(lastKimiErr||'未知错误')+' —— 请检查密钥是否有效、KIMI_MODEL 型号是否存在；且该描述无内置示例匹配')
+        :('未检测到 KIMI_API_KEY 环境变量（注意：设置环境变量后必须重新部署/重启服务才会生效）；该描述也无内置示例匹配');
+      return send({error:hint},502);
+    }
     const app={id:Date.now(),communityId:String(com.id),creator:user.username,spec:spec,engine:engine,createdAt:Date.now()};
     db.communityApps.push(app);save();send({app:app,engine:engine});
   }
@@ -535,6 +547,10 @@ const server=http.createServer(async(req,res)=>{
       return send({result:old.result,repeat:true});
     const result=FORTUNES[Math.floor(Math.random()*FORTUNES.length)];
     db.appDraws[key]={result:result,ts:Date.now()};save();send({result:result,repeat:false});
+  }
+  else if(m==='GET'&&p==='/api/ai-status'){
+    if(needUser())return;
+    send({configured:!!KIMI_KEY,model:KIMI_MODEL,lastError:lastKimiErr});
   }
   else if(m==='GET'&&p==='/api/rank'){
     send({ranks:[...db.users].sort((a,b)=>b.rep*50+b.coins-(a.rep*50+a.coins)).slice(0,5)
