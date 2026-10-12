@@ -552,6 +552,16 @@ const server=http.createServer(async(req,res)=>{
     if(needUser())return;
     send({configured:!!KIMI_KEY,model:KIMI_MODEL,lastError:lastKimiErr});
   }
+  else if(m==='GET'&&p==='/api/kimi-models'){
+    if(needUser())return;
+    if(!KIMI_KEY)return send({error:'未配置 KIMI_API_KEY'},400);
+    try{
+      const r=await fetch('https://api.moonshot.cn/v1/models',{headers:{Authorization:'Bearer '+KIMI_KEY}});
+      const d=await r.json();
+      if(!r.ok)return send({error:'查询失败：HTTP '+r.status+' '+(d.error&&d.error.message||'')},502);
+      send({models:(d.data||[]).map(x=>x.id)});
+    }catch(e){send({error:'查询失败：'+String(e&&e.message||e).slice(0,100)},502);}
+  }
   else if(m==='GET'&&p==='/api/rank'){
     send({ranks:[...db.users].sort((a,b)=>b.rep*50+b.coins-(a.rep*50+a.coins)).slice(0,5)
       .map(u=>({name:u.username,pt:u.rep*50+u.coins}))});
