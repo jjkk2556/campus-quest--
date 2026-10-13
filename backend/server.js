@@ -174,12 +174,12 @@ async function genByKimi(prompt, base) {
   if (!KIMI_KEY) return null;
   try {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 30000);
+    const timer = setTimeout(() => ctrl.abort(), 3000000);
     const r = await fetch('https://api.moonshot.cn/v1/chat/completions', {
       method: 'POST', signal: ctrl.signal,
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KIMI_KEY },
       body: JSON.stringify({
-        model: KIMI_MODEL, temperature: 0.2, response_format: { type: 'json_object' },
+        model: KIMI_MODEL, temperature: 1, response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: '你是"AI工坊"的代码生成器。用户用自然语言描述想要的任意小工具，你输出一个 JSON 对象（不要输出任何其他文字）：{"type":"简短英文标识","title":"工具名称（中文，不超过15字）","code":"完整的 React 函数组件源码"}。对 code 的要求：1) 一个默认导出（export default）的 React 函数组件；2) 可使用 import { useState, useEffect } from "react" 等 Hook；3) 样式全部用内联 style，深色背景 #1a1a2b 配浅色文字；4) 不引用任何外部库、图片 URL 或本地文件；5) 单文件、可直接编译运行，尽量不超过 120 行；6) 组件要有完整的交互闭环。' },
           { role: 'user', content: base
