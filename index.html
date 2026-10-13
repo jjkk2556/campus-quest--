@@ -260,6 +260,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
 .proof-tools.show{display:flex;}
 .pbtn{cursor:pointer;font-family:inherit;font-size:11px;border:var(--cardBorder);border-radius:var(--radius);background:var(--panel2);color:var(--cardInk);padding:6px 12px;box-shadow:var(--shadow);}
 .pbtn:active{transform:translateY(2px);box-shadow:none;}
+.accept-btn.busy,.btn.busy{background:#555!important;color:#999!important;cursor:not-allowed;filter:grayscale(.6);}
 .shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
 .shop-card{background:var(--panel2);border:var(--cardBorder);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;text-align:center;color:var(--cardInk);display:flex;flex-direction:column;}
 .shop-card .ic{font-size:34px;margin-bottom:8px;}
@@ -493,6 +494,15 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
   </div>
 </div>
 
+<!-- 运行小应用 -->
+<div class="modal-mask" id="appRunMask" style="z-index:2500">
+  <div class="modal" style="max-width:720px">
+    <button class="mx" onclick="closeAppRun()">✕</button>
+    <h3>▶ <span id="appRunName"></span></h3>
+    <div id="appRunBody"></div>
+  </div>
+</div>
+
 <!-- 再次开发 -->
 <div class="modal-mask" id="redevMask">
   <div class="modal" style="max-width:440px">
@@ -502,7 +512,7 @@ footer a{color:var(--cyan);cursor:pointer;text-decoration:underline;}
     <div class="field"><label>新的要求</label><textarea id="redevIn" rows="3" maxlength="200" placeholder="例：把选项改成 A/B/C，再加一个倒计时"></textarea></div>
     <div class="actions">
       <button class="btn ghost" style="margin-top:0" onclick="closeRedev()">取消</button>
-      <button class="btn" style="margin-top:0" onclick="doRedev()">迭代生成</button>
+      <button class="btn" style="margin-top:0" id="redevBtn" onclick="doRedev()">迭代生成</button>
     </div>
   </div>
 </div>
@@ -1148,14 +1158,19 @@ function openRedev(id){
 }
 function closeRedev(){$('redevMask').classList.remove('show');}
 async function doRedev(){
+  if(_aiBusy){toast('⚠️ 上一个生成请求还没完成，请稍候再试');beep(220,.1);return;}
   const prompt=$('redevIn').value.trim();
   if(!prompt)return toast('✘ 请填写新的要求');
+  _aiBusy=true;
+  const rb=$('redevBtn');if(rb){rb.classList.add('busy');rb.textContent='迭代中…';}
   try{
     if(!online)throw new Error('离线试玩暂不支持，请连接服务器');
     await api('/api/apps/'+_redevId+'/redev',{method:'POST',body:JSON.stringify({prompt:prompt})});
     beep(880);toast('✔ 迭代完成，已生成新版');
     closeRedev();loadComm();
   }catch(e){toast('✘ '+e.message);beep(220,.15);}
+  _aiBusy=false;
+  if(rb){rb.classList.remove('busy');rb.textContent='迭代生成';}
 }
 async function delApp(id){
   if(!confirm('确定删除这个小工具？其投票/抽签数据会一并清除。'))return;
@@ -1170,20 +1185,49 @@ async function delApp(id){
     beep(440,.08);toast('🗑 已删除');loadComm();
   }catch(e){toast('✘ '+e.message);beep(220,.1);}
 }
+function openAppRun(id){
+  const a=commApps.find(x=>x.id===id);
+  if(!a||!a.code)return;
+  $('appRunName').textContent=a.title;
+  $('appRunBody').innerHTML='<div id="sp-run-'+a.id+'" style="min-height:420px"><div class="mempty">沙箱加载中…</div></div>';
+  $('appRunMask').classList.add('show');
+  let tries=0;
+  const tryMount=()=>{
+    const box=document.getElementById('sp-run-'+a.id);
+    if(!box)return;
+    if(window.__sandboxFail){box.innerHTML='<div class="mempty">沙箱依赖加载失败：当前网络无法访问 CDN</div>';return;}
+    if(window.__sandboxReady&&window.__mountSandpack){window.__mountSandpack('run-'+a.id,a.code);return;}
+    if(++tries<40)setTimeout(tryMount,300);
+    else box.innerHTML='<div class="mempty">沙箱加载超时，请刷新重试</div>';
+  };
+  tryMount();
+}
+function closeAppRun(){
+  $('appRunMask').classList.remove('show');
+  $('appRunBody').innerHTML='';
+}
 function openCommTool(){commTool=true;loadComm();refreshAiStatus();}
 function toolPanelHTML(){
   return '<button class="pbtn" style="margin-bottom:10px" onclick="commTool=false;loadComm()">◀ 返回聊天</button>'+
   '<div class="cert-banner">🤖 <b>AI 工坊</b>：一句话生成社区小应用，仅本社区成员可用。例如：<br>'+
   '· "一个宿舍卫生值日表生成器"<br>· "帮我做个课堂随机点名的转盘"<br>· "投票：团建去哪，选项：爬山、烧烤"</div>'+
   '<div class="chat-input" style="margin-bottom:8px"><input id="aiIn" maxlength="100" placeholder="描述你想要的小应用…" '+
-  'onkeydown="if(event.key===\'Enter\')doGenApp()"><button class="accept-btn" onclick="doGenApp()">生成</button></div>'+
+  'onkeydown="if(event.key===\'Enter\')doGenApp()"><button class="accept-btn" id="aiGenBtn" onclick="doGenApp()">生成</button></div>'+
   '<div id="aiStatus" style="font-size:11px;color:var(--dim);margin-bottom:8px"></div>'+
   '<div id="aiLog" style="font-size:11px;color:var(--dim);min-height:18px;margin-bottom:10px"></div>'+
   '<div id="appCards"></div>';
 }
+let _aiBusy=false;
+function setGenBusy(b){
+  _aiBusy=b;
+  const btn=$('aiGenBtn');
+  if(btn){btn.classList.toggle('busy',b);btn.textContent=b?'生成中…':'生成';}
+}
 async function doGenApp(){
+  if(_aiBusy){toast('⚠️ 上一个生成请求还没完成，请稍候再试');beep(220,.1);return;}
   const inp=$('aiIn');const prompt=inp.value.trim();
   if(!prompt)return;
+  setGenBusy(true);
   const log=$('aiLog');
   for(const st of ['🤖 理解需求…','🧩 匹配模板…','🎨 生成界面…']){
     log.textContent=st;await new Promise(r=>setTimeout(r,350));
@@ -1197,6 +1241,7 @@ async function doGenApp(){
     inp.value='';
     beep(880);setTimeout(()=>loadComm(),400);
   }catch(e){log.textContent='';toast('✘ '+e.message);beep(220,.15);refreshAiStatus();}
+  setGenBusy(false);
 }
 let _cardsSig=null,_spRetry=0;
 function renderAppCards(){
@@ -1220,7 +1265,7 @@ function mountSandboxes(){
     return;
   }
   if(!window.__sandboxReady||!window.__mountSandpack){
-    if(_spRetry++<400){setTimeout(mountSandboxes,500);}
+    if(_spRetry++<40){setTimeout(mountSandboxes,500);}
     else{
       todo.forEach(a=>{const el=document.getElementById('sp-'+a.id);
         if(el&&el.dataset.m!=='1'){el.dataset.m='1';
@@ -1236,7 +1281,7 @@ function appCard(a){
     return '<div class="shop-card" style="text-align:left"><div class="nm">🧩 '+esc(a.title)+'</div>'+
     '<div class="cm" style="font-size:10px;color:var(--dim);margin-bottom:6px">by '+esc(a.creator)+' · '+(a.engine==='kimi'?'Kimi AI 生成':'内置示例')+'</div>'+
     manageBtns(a,true)+
-    '<div id="sp-'+a.id+'" style="min-height:120px"><div class="mempty">沙箱加载中…（首次加载约 1-3MB，国内 CDN）</div></div></div>';
+    '<button class="accept-btn" style="width:100%;margin-top:4px;padding:10px" onclick="openAppRun('+a.id+')">▶ 打开应用</button></div>';
   }
   if(a.type==='vote'){
     const bars=a.options.map((o,i)=>{
@@ -1447,7 +1492,7 @@ function toast(msg){
   void t.offsetWidth;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();closeShop();closeList();closeItem();closeComm();closeBag();closeRedev();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAuth();closePublish();closeProof();closeLightbox();closeShop();closeList();closeItem();closeComm();closeBag();closeRedev();closeAppRun();}});
 (async()=>{await initNet();
 $('lightbox').addEventListener('click',e=>{if(e.target===$('lightbox'))closeLightbox();});
 renderAll();})();
@@ -1480,24 +1525,61 @@ renderAll();})();
     sc.onerror = function () { loadChain(list, idx + 1, done, key); };
     (document.head || document.getElementsByTagName("head")[0]).appendChild(sc);
   }
+  /* React + ReactDOM 就绪即认为沙箱可用；Babel 后台懒加载（只在编译新应用时才需要） */
   loadChain(SP_CDN.react, 0, function () {
-    loadChain(SP_CDN.reactdom, 0, function () {
-      loadChain(SP_CDN.babel, 0, function () { window.__sandboxReady = true; }, "babel");
-    }, "reactdom");
+    loadChain(SP_CDN.reactdom, 0, function () { window.__sandboxReady = true; }, "reactdom");
   }, "react");
+  loadChain(SP_CDN.babel, 0, function () { window.__babelReady = true; }, "babel");
+
+  /* 编译结果缓存：每个应用一生只编译一次，持久化到 localStorage */
+  window.__compileCache = {};
+  try {
+    var saved = JSON.parse(localStorage.getItem("cq_compile") || "{}");
+    for (var k in saved) window.__compileCache[k] = saved[k];
+  } catch (e) {}
+  function hashStr(s) {
+    var x = 0;
+    for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) | 0;
+    return "h" + (x >>> 0).toString(36);
+  }
+  function persistCompile() {
+    try {
+      var keys = Object.keys(window.__compileCache);
+      var obj = {};
+      for (var j = keys.length > 40 ? keys.length - 40 : 0; j < keys.length; j++) obj[keys[j]] = window.__compileCache[keys[j]];
+      localStorage.setItem("cq_compile", JSON.stringify(obj));
+    } catch (e) {}
+  }
+
   window.__unmountAllSandpacks = function () {
     var fs = document.querySelectorAll("iframe[data-sp]");
     for (var t = 0; t < fs.length; t++) { if (fs[t].parentNode) fs[t].parentNode.removeChild(fs[t]); }
   };
+
   window.__mountSandpack = function (id, code) {
     var el = document.getElementById("sp-" + id);
     if (!el || el.dataset.m === "1") return;
+    var src = String(code);
+    var hash = hashStr(src);
+    var compiled = window.__compileCache[hash];
+    if (!compiled) {
+      if (!window.__babelReady) { setTimeout(function () { window.__mountSandpack(id, code); }, 300); return; }
+      try {
+        compiled = Babel.transform(src, { presets: ["react", "env"] }).code;
+        window.__compileCache[hash] = compiled;
+        persistCompile();
+      } catch (e) {
+        el.dataset.m = "1";
+        el.innerHTML = "<div style='font-size:11px;color:#f88;padding:10px;word-break:break-all'>编译失败：" + String(e && e.message || e).slice(0, 200) + "</div>";
+        parent.postMessage && window.postMessage({ spError: id, msg: "compile fail" }, "*");
+        return;
+      }
+    }
     el.dataset.m = "1";
     var u = window.__spUrls || {};
-    var codeJson = JSON.stringify(String(code)).replace(/<\/script/g, "<\\/script");
+    var compiledJson = JSON.stringify(compiled).replace(/<\/script/g, "<\\/script");
     var runner = "try{"
-      + "var code=" + codeJson + ";"
-      + "var transformed=Babel.transform(code,{presets:['react','env']}).code;"
+      + "var transformed=" + compiledJson + ";"
       + "var module={exports:{}};"
       + "var fn=new Function('React','ReactDOM','module','exports','require',transformed+';return (typeof App!==\"undefined\"&&App)||exports.default||(module.exports&&module.exports.default)||null;');"
       + "var Comp=fn(React,ReactDOM,module,module.exports,function(n){return n===\"react\"?React:null;});"
@@ -1508,7 +1590,6 @@ renderAll();})();
     var doc = "<!DOCTYPE html><html><head><meta charset='utf-8'>"
       + "<script src='" + u.react + "'><\/script>"
       + "<script src='" + u.reactdom + "'><\/script>"
-      + "<script src='" + u.babel + "'><\/script>"
       + "<style>body{margin:0;background:#1a1a2b}</style>"
       + "</head><body><div id='root'></div><scr" + "ipt>" + runner + "</scr" + "ipt></body></html>";
     el.innerHTML = "";
@@ -1523,7 +1604,10 @@ renderAll();})();
     var d = e.data || {};
     if (d.spError !== undefined) {
       var el = document.getElementById("sp-" + d.spError);
-      if (el) el.innerHTML = "<div style='font-size:11px;color:#f88;padding:10px;word-break:break-all'>应用运行错误：" + String(d.msg).slice(0, 200) + "</div>";
+      if (el && el.dataset.err !== "1") {
+        el.dataset.err = "1";
+        el.innerHTML = "<div style='font-size:11px;color:#f88;padding:10px;word-break:break-all'>应用运行错误：" + String(d.msg).slice(0, 200) + "</div>";
+      }
     }
   });
 })();
