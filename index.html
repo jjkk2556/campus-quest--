@@ -1197,7 +1197,7 @@ function openAppRun(id){
     if(!box)return;
     if(window.__sandboxFail){box.innerHTML='<div class="mempty">沙箱依赖加载失败：当前网络无法访问 CDN</div>';return;}
     if(window.__sandboxReady&&window.__mountSandpack){window.__mountSandpack('run-'+a.id,a.code);return;}
-    if(++tries<40)setTimeout(tryMount,300);
+    if(++tries<4000)setTimeout(tryMount,300);
     else box.innerHTML='<div class="mempty">沙箱加载超时，请刷新重试</div>';
   };
   tryMount();
